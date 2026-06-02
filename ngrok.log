@@ -1,0 +1,77 @@
+t=2026-06-02T18:25:23+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-02T18:25:23+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local/ngrok/ngrok.yml
+t=2026-06-02T18:25:23+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-02T18:25:23+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T18:25:23+0500 lvl=eror msg="failed to reconnect session" obj=tunnels.session obj=csess id=dc798675b79b err="authentication failed: Your ngrok-agent version \"3.3.1\" is too old. The minimum supported agent version for your account is \"3.20.0\". Update to a newer version with 'ngrok update', by downloading from https://ngrok.com/download, or by updating your SDK version. Paid accounts are currently excluded from minimum agent version requirements. To begin handling traffic immediately without updating your agent, upgrade to a paid plan: https://dashboard.ngrok.com/billing/choose-a-plan.\r\n\r\nERR_NGROK_121\r\n"
+t=2026-06-02T18:25:23+0500 lvl=eror msg="session closing" obj=tunnels.session err="authentication failed: Your ngrok-agent version \"3.3.1\" is too old. The minimum supported agent version for your account is \"3.20.0\". Update to a newer version with 'ngrok update', by downloading from https://ngrok.com/download, or by updating your SDK version. Paid accounts are currently excluded from minimum agent version requirements. To begin handling traffic immediately without updating your agent, upgrade to a paid plan: https://dashboard.ngrok.com/billing/choose-a-plan.\r\n\r\nERR_NGROK_121\r\n"
+t=2026-06-02T18:25:23+0500 lvl=info msg="received stop request" obj=app stopReq="{err:{Remote:true Inner:0xc000063ad0} restart:false}"
+t=2026-06-02T18:25:23+0500 lvl=eror msg="terminating with error" obj=app err="authentication failed: Your ngrok-agent version \"3.3.1\" is too old. The minimum supported agent version for your account is \"3.20.0\". Update to a newer version with 'ngrok update', by downloading from https://ngrok.com/download, or by updating your SDK version. Paid accounts are currently excluded from minimum agent version requirements. To begin handling traffic immediately without updating your agent, upgrade to a paid plan: https://dashboard.ngrok.com/billing/choose-a-plan.\r\n\r\nERR_NGROK_121\r\n"
+t=2026-06-02T18:25:23+0500 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.equinox.io/check\": context canceled"
+t=2026-06-02T18:25:23+0500 lvl=crit msg="command failed" err="authentication failed: Your ngrok-agent version \"3.3.1\" is too old. The minimum supported agent version for your account is \"3.20.0\". Update to a newer version with 'ngrok update', by downloading from https://ngrok.com/download, or by updating your SDK version. Paid accounts are currently excluded from minimum agent version requirements. To begin handling traffic immediately without updating your agent, upgrade to a paid plan: https://dashboard.ngrok.com/billing/choose-a-plan.\r\n\r\nERR_NGROK_121\r\n"
+t=2026-06-02T18:25:23+0500 lvl=info msg="no more state changes" obj=tunnels.session
+t=2026-06-02T18:27:35+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-02T18:27:35+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-02T18:27:35+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-02T18:27:35+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T18:27:35+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T18:27:36+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T18:27:36+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T18:27:36+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://jumbo-ultimatum-landlady.ngrok-free.dev
+t=2026-06-02T18:27:37+0500 lvl=info msg="update available" obj=updater
+t=2026-06-02T18:27:45+0500 lvl=info msg=start pg=/api/tunnels id=6eb72ae25428cbd5
+t=2026-06-02T18:27:45+0500 lvl=info msg=end pg=/api/tunnels id=6eb72ae25428cbd5 status=200 dur=997.1µs
+t=2026-06-02T18:27:46+0500 lvl=info msg="join connections" obj=join id=475e63d88d41 l=127.0.0.1:5055 r=202.47.48.133:63711
+t=2026-06-02T18:27:46+0500 lvl=info msg=start pg=/api/tunnels id=c07562c6ee4e31f1
+t=2026-06-02T18:27:46+0500 lvl=info msg=end pg=/api/tunnels id=c07562c6ee4e31f1 status=200 dur=0s
+t=2026-06-02T18:27:47+0500 lvl=info msg="join connections" obj=join id=fd48ec6818ba l=127.0.0.1:5055 r=202.47.48.133:63711
+t=2026-06-02T18:28:05+0500 lvl=info msg=start pg=/api/tunnels id=550a47f2253c91ad
+t=2026-06-02T18:28:05+0500 lvl=info msg=end pg=/api/tunnels id=550a47f2253c91ad status=200 dur=1.0225ms
+t=2026-06-02T18:28:17+0500 lvl=info msg=start pg=/api/tunnels id=ca2f2f1be0cc188c
+t=2026-06-02T18:28:17+0500 lvl=info msg=end pg=/api/tunnels id=ca2f2f1be0cc188c status=200 dur=0s
+t=2026-06-02T18:40:40+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-02T18:40:40+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-02T18:40:40+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-02T18:40:40+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T18:40:40+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T18:40:41+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T18:40:41+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T18:40:42+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://jumbo-ultimatum-landlady.ngrok-free.dev
+t=2026-06-02T18:41:19+0500 lvl=info msg=start pg=/api/tunnels id=915fa560addad36b
+t=2026-06-02T18:41:19+0500 lvl=info msg=end pg=/api/tunnels id=915fa560addad36b status=200 dur=1.1462ms
+t=2026-06-02T18:42:31+0500 lvl=info msg=start pg=/api/tunnels id=f64a25dff12ba627
+t=2026-06-02T18:42:31+0500 lvl=info msg=end pg=/api/tunnels id=f64a25dff12ba627 status=200 dur=2.3321ms
+t=2026-06-02T18:43:58+0500 lvl=info msg=start pg=/api/tunnels id=caf01ca1ef5b87b7
+t=2026-06-02T18:43:58+0500 lvl=info msg=end pg=/api/tunnels id=caf01ca1ef5b87b7 status=200 dur=1.9954ms
+t=2026-06-02T18:44:30+0500 lvl=info msg=start pg=/api/tunnels id=2e49762f98c4e60d
+t=2026-06-02T18:44:30+0500 lvl=info msg=end pg=/api/tunnels id=2e49762f98c4e60d status=200 dur=2.9939ms
+t=2026-06-02T19:01:39+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-02T19:01:39+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-02T19:01:39+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-02T19:01:39+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T19:01:40+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T19:01:42+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T19:01:42+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T19:01:43+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://jumbo-ultimatum-landlady.ngrok-free.dev
+t=2026-06-02T19:01:45+0500 lvl=info msg=start pg=/api/tunnels id=9295aa5e9c641ead
+t=2026-06-02T19:01:45+0500 lvl=info msg=end pg=/api/tunnels id=9295aa5e9c641ead status=200 dur=1.0049ms
+t=2026-06-02T19:01:49+0500 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-02T19:02:16+0500 lvl=info msg=start pg=/api/tunnels id=2afaa52cac5358d4
+t=2026-06-02T19:02:16+0500 lvl=info msg=end pg=/api/tunnels id=2afaa52cac5358d4 status=200 dur=0s
+t=2026-06-02T19:02:54+0500 lvl=info msg=start pg=/api/tunnels id=2a287cbb09a36742
+t=2026-06-02T19:02:54+0500 lvl=info msg=end pg=/api/tunnels id=2a287cbb09a36742 status=200 dur=0s
+t=2026-06-02T19:03:14+0500 lvl=info msg="join connections" obj=join id=19a8562bbdda l=127.0.0.1:5055 r=202.47.48.133:63470
+t=2026-06-02T19:03:14+0500 lvl=info msg="join connections" obj=join id=6b5204dd7698 l=127.0.0.1:5055 r=202.47.48.133:63470
+t=2026-06-02T19:03:54+0500 lvl=info msg=start pg=/api/tunnels id=94012d241d75695f
+t=2026-06-02T19:03:54+0500 lvl=info msg=end pg=/api/tunnels id=94012d241d75695f status=200 dur=0s
+t=2026-06-02T19:04:24+0500 lvl=info msg=start pg=/api/tunnels id=7336b3cf2d1dbd27
+t=2026-06-02T19:04:24+0500 lvl=info msg=end pg=/api/tunnels id=7336b3cf2d1dbd27 status=200 dur=659.2µs
+t=2026-06-02T19:04:54+0500 lvl=info msg=start pg=/api/tunnels id=ce374857c632258c
+t=2026-06-02T19:04:54+0500 lvl=info msg=end pg=/api/tunnels id=ce374857c632258c status=200 dur=1.0019ms
+t=2026-06-02T19:05:25+0500 lvl=info msg=start pg=/api/tunnels id=7bcb3e53846beb4c
+t=2026-06-02T19:05:25+0500 lvl=info msg=end pg=/api/tunnels id=7bcb3e53846beb4c status=200 dur=0s
+t=2026-06-02T19:05:55+0500 lvl=info msg=start pg=/api/tunnels id=a22a21fd8a42c4cf
+t=2026-06-02T19:05:55+0500 lvl=info msg=end pg=/api/tunnels id=a22a21fd8a42c4cf status=200 dur=0s
+t=2026-06-02T19:06:25+0500 lvl=info msg=start pg=/api/tunnels id=61a6955a547c4d68
+t=2026-06-02T19:06:25+0500 lvl=info msg=end pg=/api/tunnels id=61a6955a547c4d68 status=200 dur=0s
+t=2026-06-02T19:06:55+0500 lvl=info msg=start pg=/api/tunnels id=308c72ca5bdeecbc
+t=2026-06-02T19:06:55+0500 lvl=info msg=end pg=/api/tunnels id=308c72ca5bdeecbc status=200 dur=0s

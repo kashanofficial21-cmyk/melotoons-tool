@@ -1,0 +1,29 @@
+t=2026-06-02T18:45:15+0500 lvl=info msg="open config file" path=d:\\Projects\\yt-title-generator\\ngrok_config\\ngrok.yml err=nil
+t=2026-06-02T18:45:15+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T18:45:15+0500 lvl=warn msg="can't bind default web address, trying alternatives" obj=web addr=127.0.0.1:4040
+t=2026-06-02T18:45:15+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4041 allow_hosts=[]
+t=2026-06-02T18:45:16+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T18:45:16+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T18:45:16+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://niece-lens-aftermath.ngrok-free.dev
+t=2026-06-02T18:45:18+0500 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": EOF"
+t=2026-06-02T18:45:36+0500 lvl=info msg=start pg=/api/tunnels id=da3dabb6aeefe92c
+t=2026-06-02T18:45:36+0500 lvl=info msg=end pg=/api/tunnels id=da3dabb6aeefe92c status=200 dur=1.9949ms
+t=2026-06-02T18:46:11+0500 lvl=info msg="join connections" obj=join id=094468cd71d3 l=127.0.0.1:5055 r=202.47.48.133:64132
+t=2026-06-02T18:46:12+0500 lvl=info msg="join connections" obj=join id=a23238e4031f l=127.0.0.1:5055 r=202.47.48.133:64132
+t=2026-06-02T18:48:12+0500 lvl=info msg="join connections" obj=join id=7d88cc577f75 l=127.0.0.1:5055 r=202.47.48.133:62496
+t=2026-06-02T18:48:12+0500 lvl=info msg="join connections" obj=join id=39c5760905cb l=127.0.0.1:5055 r=202.47.48.133:62496
+t=2026-06-02T18:51:11+0500 lvl=info msg="join connections" obj=join id=1339c24a330a l=127.0.0.1:5055 r=202.47.48.133:62496
+t=2026-06-02T18:53:43+0500 lvl=info msg="join connections" obj=join id=c871774e2cf0 l=127.0.0.1:5055 r=202.47.48.133:62496
+t=2026-06-02T19:08:16+0500 lvl=info msg="open config file" path=d:\\Projects\\yt-title-generator\\ngrok_config\\ngrok.yml err=nil
+t=2026-06-02T19:08:16+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T19:08:16+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T19:08:16+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T19:08:16+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T19:08:17+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://niece-lens-aftermath.ngrok-free.dev
+t=2026-06-02T19:08:18+0500 lvl=info msg="update available" obj=updater
+t=2026-06-02T19:08:26+0500 lvl=info msg=start pg=/api/tunnels id=116757affae40903
+t=2026-06-02T19:08:26+0500 lvl=info msg=end pg=/api/tunnels id=116757affae40903 status=200 dur=1.2524ms
+t=2026-06-02T19:08:27+0500 lvl=info msg="join connections" obj=join id=d52a887edab7 l=127.0.0.1:5055 r=202.47.48.133:63159
+t=2026-06-02T19:08:28+0500 lvl=info msg="join connections" obj=join id=2dc8c619306f l=127.0.0.1:5055 r=202.47.48.133:63159
+t=2026-06-02T19:08:35+0500 lvl=info msg=start pg=/api/tunnels id=cfacd20f346a58ca
+t=2026-06-02T19:08:35+0500 lvl=info msg=end pg=/api/tunnels id=cfacd20f346a58ca status=200 dur=0s
