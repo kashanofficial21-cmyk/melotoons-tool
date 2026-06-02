@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeloToons Title Generator v3</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<style>
+  :root{
+    --bg:#0d0f16; --card:#161a26; --card2:#1d2230; --line:#2a3142;
+    --txt:#e8ecf5; --mut:#8a93a8; --acc:#ff5a4d; --acc2:#ffb020; --ok:#34d399;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:
+       radial-gradient(1200px 500px at 50% -200px,#1c2030,transparent),var(--bg);
+       color:var(--txt);min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:32px 18px 80px}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:.3px}
+  h1 span{color:var(--acc)}
+  .sub{color:var(--mut);font-size:14px;margin-bottom:24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+
+  /* upload */
+  #drop{border:2px dashed #3a4256;border-radius:14px;padding:34px 18px;text-align:center;
+        cursor:pointer;transition:.18s;background:var(--card2)}
+  #drop.drag{border-color:var(--acc);background:#241d22}
+  #drop .big{font-size:44px;line-height:1}
+  #drop p{margin:10px 0 2px;font-size:15px}
+  #drop small{color:var(--mut)}
+  input[type=file]{display:none}
+  video{width:100%;max-height:360px;border-radius:12px;margin-top:14px;background:#000;display:none}
+
+  .hint{width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line);
+        color:var(--txt);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit}
+  .hint::placeholder{color:#5d6b87}
+
+  .btn{width:100%;margin-top:16px;border:0;border-radius:12px;padding:15px;font-size:16px;
+       font-weight:700;color:#fff;background:linear-gradient(90deg,var(--acc),#ff7a2d);
+       cursor:pointer;transition:.15s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+
+  .spin{display:inline-block;width:18px;height:18px;border:3px solid #ffffff66;
+        border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;vertical-align:-3px;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  /* results */
+  #out{display:none}
+  .lbl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin:0 0 8px;font-weight:700}
+  .row{display:flex;gap:8px;align-items:flex-start;margin-bottom:9px}
+  .val{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:10px;
+       padding:11px 13px;font-size:15px;line-height:1.5;white-space:pre-wrap}
+  .title-val{font-weight:600}
+  .copy{flex:0 0 auto;background:#252b3a;border:1px solid var(--line);color:var(--txt);
+        border-radius:9px;padding:9px 12px;font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .copy:hover{background:#303749}
+  .copy.done{background:var(--ok);border-color:var(--ok);color:#06281c}
+  .tags{display:flex;flex-wrap:wrap;gap:7px}
+  .tag{background:#222838;border:1px solid var(--line);border-radius:7px;padding:5px 10px;font-size:13px;color:#c7cee0;display:inline-flex;align-items:center;gap:6px}
+  .tag .tscore{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;min-width:26px;text-align:center}
+  .tag .tdel{cursor:pointer;color:#f87171;font-size:11px;font-weight:700;margin-left:2px}
+  .tag .tdel:hover{color:#ef4444}
+  .tag-add{background:transparent;border:1px dashed var(--line);border-radius:7px;padding:4px 10px;font-size:13px;color:var(--mut);cursor:pointer;transition:.15s}
+  .tag-add:hover{border-color:var(--ok);color:var(--ok)}
+  .tag-input{background:var(--card2);border:1px solid var(--ok);border-radius:7px;padding:4px 8px;font-size:13px;color:var(--txt);width:160px;outline:none}
+  .summary{font-size:13px;color:var(--mut);margin-bottom:14px;line-height:1.5}
+  .badge{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px;margin-left:6px;text-transform:uppercase}
+  .b-strong{background:#0f3a2c;color:var(--ok)}
+  .b-ok{background:#3a330f;color:var(--acc2)}
+  .b-weak{background:#3a1414;color:#ff7b7b}
+  .warn{background:#3a1414;border:1px solid #5a2020;color:#ffb4b4;border-radius:10px;
+        padding:11px 13px;font-size:14px;margin-bottom:14px}
+  .tip{font-size:13px;color:var(--mut);margin-top:4px}
+  .tip b{color:var(--acc2)}
+  .err{background:#3a1414;border:1px solid #5a2020;color:#ffb4b4;border-radius:10px;padding:13px;margin-top:14px;display:none}
+  .notcfg{background:#3a330f;border:1px solid #5a4d20;color:var(--acc2);border-radius:10px;padding:12px;font-size:14px;margin-bottom:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎬 MeloToons <span>Title Generator</span></h1>
+  <div class="sub">Video upload karo → content ki zubaan mein viral title, SEO description aur discovery tags. (Powered by Gemini)</div>
+
+  {% if not configured %}
+  <div class="notcfg">⚠️ <b>Koi LLM key set nahi.</b> <code>.env</code> mein <code>GROQ_API_KEY</code> ya <code>GEMINI_API_KEY</code> daalo.</div>
+  {% else %}
+  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">🤖 Active providers: <b style="color:var(--ok)">{{ providers }}</b></div>
+  {% endif %}
+
+  <div class="card">
+    <div id="drop">
+      <div class="big">📤</div>
+      <p><b>Video yahan drag karo</b> ya click karke select karo</p>
+      <small>mp4 / mov / webm — Shorts (15–60 sec) best</small>
+      <input type="file" id="file" accept="video/*">
+    </div>
+    <video id="preview" controls></video>
+    <input type="text" class="hint" id="hint" placeholder="(Optional) Koi hint — jaise 'billi ki kahani', 'funny doodh wali'">
+    <div style="display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--mut)">
+      <input type="checkbox" id="skip_tr" style="width:16px;height:16px;cursor:pointer">
+      <label for="skip_tr" style="cursor:pointer">⚡ Fast mode — script mat nikalo (sirf title/hint se banao, 10-15 sec)</label>
+    </div>
+    <select class="hint" id="lang" style="margin-top:8px" onchange="updateLangNote()">
+      <option value="auto" selected>🌐 Auto — video ki zubaan se match kare (recommended)</option>
+      <option value="roman-urdu">Roman Urdu / Hinglish</option>
+      <option value="english">English</option>
+      <option value="hindi">Hindi (हिंदी script)</option>
+    </select>
+    <div id="langnote" style="font-size:12px;color:var(--acc2);margin-top:5px;display:none">
+      ⚡ Whisper skip hoga — ~4 sec fast hoga
+    </div>
+    <button class="btn" id="go" disabled>✨ Title + Description Banao</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="out">
+    <div class="card">
+      <div class="summary" id="summary"></div>
+      <div class="warn" id="warn" style="display:none"></div>
+      <div class="warn" id="scriptwarn" style="display:none"></div>
+      <div id="scriptbox" style="display:none;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:13px;color:#c7cee0;line-height:1.5;margin-bottom:14px;max-height:120px;overflow:auto"></div>
+      <div id="seobar" style="display:none;margin-bottom:16px"></div>
+      <div id="settingsbox" style="display:none;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 13px;font-size:14px;margin-bottom:16px;line-height:1.7"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <p class="lbl" style="margin:0">📝 Titles (koi ek click karke select karo)</p>
+        <button class="copy" id="refreshTitleBtn" onclick="refreshTitles()" style="background:#1a1a2a;border-color:#60a5fa;color:#60a5fa;font-size:12px">🔄 Naye Titles</button>
+      </div>
+      <div id="titles"></div>
+
+      <p class="lbl" style="margin-top:18px">📄 Description</p>
+      <div class="row">
+        <div class="val" id="desc"></div>
+        <button class="copy" data-for="desc">Copy</button>
+      </div>
+
+      <p class="lbl" style="margin-top:18px">🏷️ Tags
+        <span id="tagcount" style="color:var(--ok);font-weight:600;text-transform:none;letter-spacing:0"></span>
+        <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0"> — scores = search volume proxy (vidIQ style). Click ❌ to remove, + to add</span>
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="copy" onclick="copyTagsRaw(this)" style="flex-shrink:0">📋 Copy (YouTube paste)</button>
+        <button class="copy" id="refreshbtn" onclick="refreshTags()" style="flex-shrink:0;background:#1a2a1a;border-color:#34d399;color:#34d399">🔄 Refresh Tags</button>
+      </div>
+      <div style="font-size:11px;color:var(--mut);margin-bottom:6px">💡 YouTube Tags box mein paste karo → har tag alag ho jaayega (comma se)</div>
+      <div class="val" id="tagswrap">
+        <div class="tags" id="tags"></div>
+        <span class="tag-add" onclick="addTagInput()" style="margin-top:6px;display:inline-block">+ Add tag</span>
+      </div>
+      <div id="tagSuggestions" style="display:none;background:var(--card2);border:1px solid #34d399;border-radius:10px;padding:10px 12px;margin-top:8px"></div>
+      <textarea id="tagsraw" style="display:none"></textarea>
+
+      <div id="kwmap" style="display:none;margin-bottom:16px"></div>
+      <div id="searchkw" style="display:none;margin-bottom:16px"></div>
+
+      <p class="lbl" style="margin-top:18px"># Hashtags <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">— tags se ALAG, title/description ke liye (3-5)</span></p>
+      <div class="row"><div class="val"><div class="tags" id="hashtags"></div></div><button class="copy" data-for="hashraw">Copy</button></div>
+      <textarea id="hashraw" style="display:none"></textarea>
+
+      <p class="lbl" style="margin-top:18px">🎬 Hook — pehle 3 second <span style="color:var(--acc2);font-weight:600;text-transform:none;letter-spacing:0">(sabse zaroori — yahi views rokta hai)</span></p>
+      <div class="row"><div class="val" id="hookscript"></div><button class="copy" data-for="hookscript">Copy</button></div>
+
+      <p class="lbl" style="margin-top:18px">💬 Pinned Comment <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">— ise pin karo, comments badhte hain</span></p>
+      <div class="row"><div class="val" id="pinned"></div><button class="copy" data-for="pinned">Copy</button></div>
+
+      <p class="lbl" style="margin-top:18px">🖼️ Thumbnail Text <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">— thumbnail pe yeh bold likho</span></p>
+      <div class="row"><div class="val" id="thumbtext"></div><button class="copy" data-for="thumbtext">Copy</button></div>
+
+      <div class="tip" id="thumbtip" style="margin-top:18px"></div>
+      <div class="tip" id="hooktip"></div>
+
+      <div id="seochecks" style="margin-top:18px"></div>
+      <div id="seoextra" style="margin-top:18px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const drop=document.getElementById('drop'), fileIn=document.getElementById('file'),
+      preview=document.getElementById('preview'), go=document.getElementById('go'),
+      err=document.getElementById('err'), out=document.getElementById('out');
+let chosen=null;
+
+drop.onclick=()=>fileIn.click();
+['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',ev=>{ if(ev.dataTransfer.files.length) setFile(ev.dataTransfer.files[0]); });
+fileIn.onchange=()=>{ if(fileIn.files.length) setFile(fileIn.files[0]); };
+
+function updateLangNote(){
+  const v=document.getElementById('lang').value;
+  document.getElementById('langnote').style.display=(v!=='auto'?'block':'none');
+}
+function setFile(f){
+  if(!f.type.startsWith('video')){ showErr('Yeh video file nahi hai.'); return; }
+  chosen=f; err.style.display='none';
+  preview.src=URL.createObjectURL(f); preview.style.display='block';
+  drop.querySelector('p').innerHTML='<b>✅ '+f.name+'</b>';
+  go.disabled=false;
+}
+function showErr(m){ err.textContent='⚠️ '+m; err.style.display='block'; }
+
+go.onclick=async()=>{
+  if(!chosen) return;
+  go.disabled=true; out.style.display='none'; err.style.display='none';
+  const skip = document.getElementById('skip_tr').checked;
+  go.innerHTML='<span class="spin"></span>'+(skip?'⚡ Fast mode... (~10 sec)':'🔍 Script + SEO + Metadata... (~15 sec)');
+  const fd=new FormData();
+  fd.append('video',chosen);
+  fd.append('hint',document.getElementById('hint').value||'');
+  fd.append('lang',document.getElementById('lang').value||'auto');
+  fd.append('skip_tr', document.getElementById('skip_tr').checked ? '1' : '0');
+  try{
+    const r=await fetch('/generate',{method:'POST',body:fd});
+    const j=await r.json();
+    if(!j.ok){ showErr(j.error||'Kuch galat hua'); }
+    else render(j.result);
+  }catch(e){ showErr('Network/Server error: '+e.message); }
+  go.disabled=false; go.innerHTML='✨ Title + Description Banao';
+};
+
+function render(d){
+  // summary + niche badge
+  const fit=(d.niche_fit||'ok').toLowerCase();
+  const cls=fit==='strong'?'b-strong':(fit==='weak'?'b-weak':'b-ok');
+  const langTxt = d.detected_language ? ' <span class="badge b-ok">lang: '+d.detected_language+'</span>' : '';
+  // keyword consistency chain
+  const kw=(d.primary_keyword||'').toLowerCase();
+  const t0=(d.titles&&d.titles[0]||'').toLowerCase();
+  const desc0=(d.description||'').toLowerCase().substring(0,125);
+  const tag0=(d.tags&&d.tags[0]||'').toLowerCase();
+  const kwOk = s => kw && s.includes(kw.split(' ')[0]);
+  const kwChain =
+    '<span title="keyword in title?" style="color:'+(kwOk(t0)?'var(--ok)':'#f87171')+'">Title</span> → '+
+    '<span title="keyword in desc line1?" style="color:'+(kwOk(desc0)?'var(--ok)':'#f87171')+'">Desc</span> → '+
+    '<span title="keyword in first tag?" style="color:'+(kwOk(tag0)?'var(--ok)':'#f87171')+'">Tag</span>';
+  document.getElementById('summary').innerHTML=
+    '🎯 '+(d.content_summary||'')+' <span class="badge '+cls+'">niche: '+fit+'</span>'+langTxt+
+    (d.detected_subject?'<br>👀 Subject: <b>'+d.detected_subject+'</b>':'')+
+    (d.primary_keyword?'<br>🔑 Keyword: <b>'+d.primary_keyword+'</b> &nbsp; Consistency: '+kwChain:'');
+
+  // vidIQ-style SEO score with per-category breakdown
+  const seo=d.seo||{score:0,grade:'',breakdown:{}};
+  const sc=seo.score||0;
+  const col = sc>=85?'var(--ok)':(sc>=70?'var(--acc2)':'var(--acc)');
+  const br=seo.breakdown||{};
+  const cats=[
+    {k:'title',               label:'📝 Title',              max:25, color:'#60a5fa'},
+    {k:'description',         label:'📄 Description',        max:25, color:'#34d399'},
+    {k:'tags',                label:'🏷️ Tags',               max:20, color:'#f59e0b'},
+    {k:'keyword_consistency', label:'🔑 Keyword Consistency (Triple Keyword)', max:20, color:'#fb923c'},
+    {k:'hashtags',            label:'# Hashtags + Settings', max:10, color:'#a78bfa'},
+  ];
+  let barsHtml = cats.map(c=>{
+    const cat=br[c.k]||{score:0,max:c.max,checks:[]};
+    const pct=Math.round(cat.score/c.max*100);
+    const chk=cat.checks.map(ch=>'<div style="font-size:11px;padding:1px 0;color:'+(ch.ok?'#6ee7b7':'#fca5a5')+'">'+(ch.ok?'✅':'❌')+' '+ch.label+'</div>').join('');
+    return '<div style="margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+
+        '<span>'+c.label+'</span><span style="color:'+c.color+'"><b>'+cat.score+'/'+c.max+'</b></span></div>'+
+      '<div style="height:7px;background:#252b3a;border-radius:4px;overflow:hidden;margin-bottom:4px">'+
+        '<div style="height:100%;width:'+pct+'%;background:'+c.color+'"></div></div>'+chk+'</div>';
+  }).join('');
+  document.getElementById('seobar').style.display='block';
+  const tk = seo.triple_keyword || 0;
+  const tkLabel = tk===3?'🔑 Triple Keyword: PERFECT ✅':tk===2?'🔑 Triple Keyword: 2/3 ⚠️':'🔑 Triple Keyword: '+tk+'/3 ❌';
+  const tkCol = tk===3?'var(--ok)':tk===2?'var(--acc2)':'var(--acc)';
+  document.getElementById('seobar').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+      '<b style="font-size:15px">📊 SEO Score — vidIQ Boost Level</b>'+
+      '<b style="font-size:24px;color:'+col+'">'+sc+'<span style="font-size:13px;color:var(--mut)">/100</span></b></div>'+
+    '<div style="height:12px;background:#252b3a;border-radius:6px;overflow:hidden;margin-bottom:6px">'+
+      '<div style="height:100%;width:'+sc+'%;background:linear-gradient(90deg,'+col+','+col+'aa);border-radius:6px"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-bottom:14px">'+
+      '<span style="font-size:12px;color:'+col+'">'+(seo.grade||'')+'</span>'+
+      '<span style="font-size:12px;color:'+tkCol+'">'+tkLabel+'</span></div>'+
+    barsHtml;
+
+  // YouTube settings to select (category + video language)
+  const setb=document.getElementById('settingsbox');
+  if(d.video_category || d.video_language){
+    setb.style.display='block';
+    setb.innerHTML='<b>⚙️ YouTube par yeh select karo:</b><br>'+
+      '📁 Category: <b style="color:var(--acc2)">'+(d.video_category||'—')+'</b><br>'+
+      '🗣️ Video language: <b style="color:var(--acc2)">'+(d.video_language||'—')+'</b>';
+  } else setb.style.display='none';
+
+  const warn=document.getElementById('warn');
+  if(d.warning && d.warning.trim()){ warn.style.display='block'; warn.textContent='⚠️ '+d.warning; }
+  else warn.style.display='none';
+
+  const sw=document.getElementById('scriptwarn');
+  if(d.script_warning){ sw.style.display='block'; sw.textContent=d.script_warning; }
+  else sw.style.display='none';
+
+  // extracted script (Whisper)
+  const sb=document.getElementById('scriptbox'); sb.style.display='block';
+  if(d.transcript && d.transcript.trim()){
+    sb.innerHTML='<b>🎙️ Video ka asli script'+(d.whisper_language?' ('+d.whisper_language+')':'')+':</b><br>'+d.transcript;
+  } else {
+    sb.innerHTML='<b>🎙️ Script:</b> Is video mein bol-chaal nahi mili — sirf visuals se metadata bana.';
+  }
+
+  // per-title score function (vidIQ style)
+  // Title score — EXACT match Python _seo_score (max 25 per title, scaled to 100)
+  function titleScore(title, kw) {
+    const t=title.toLowerCase(), k1=(kw||'').toLowerCase().split(' ')[0];
+    let pts=0, max=25;
+    // Keyword first 40 chars (+10)
+    if(k1 && t.indexOf(k1)>=0 && t.indexOf(k1)<46) pts+=10;
+    // Length 40-60 (+7)
+    const len=title.length;
+    if(len>=40 && len<=65) pts+=7;
+    // Emotion/curiosity (+5)
+    if(/[?!]/.test(title)||/\d/.test(title)) pts+=5;
+    // No # (+3)
+    if(!title.includes('#')) pts+=3;
+    return Math.min(100, Math.round(pts/max*100));
+  }
+
+  // titles with per-title score + click-to-select
+  const titlesDiv=document.getElementById('titles'); titlesDiv.innerHTML='';
+  let selectedTitle=null;
+  (d.titles||[]).forEach((t,i)=>{
+    const sc=titleScore(t, d.primary_keyword);
+    const scCol=sc>=80?'var(--ok)':sc>=60?'var(--acc2)':'var(--acc)';
+    const row=document.createElement('div');
+    row.className='row'; row.style.cursor='pointer'; row.style.userSelect='none';
+    row.style.transition='all 0.15s';
+    row.dataset.title=t;
+
+    const v=document.createElement('div');
+    v.className='val title-val';
+    v.style.display='flex'; v.style.alignItems='center'; v.style.gap='10px';
+    v.innerHTML=
+      '<span style="background:'+scCol+';color:#000;font-weight:800;font-size:11px;border-radius:5px;padding:2px 7px;min-width:34px;text-align:center;flex-shrink:0">'+sc+'</span>'+
+      '<span class="t-text">'+(i===0?'⭐ ':'')+t+'</span>';
+
+    const b=document.createElement('button'); b.className='copy'; b.textContent='Copy';
+    b.onclick=(e)=>{e.stopPropagation(); copyText(t,b);};
+
+    // Sync indicator for this title row
+    const sInd = document.createElement('span');
+    sInd.style.cssText = 'font-size:10px;color:var(--mut);margin-left:6px';
+    v.appendChild(sInd);
+
+    row.onclick=()=>{
+      document.querySelectorAll('#titles .row').forEach(r=>{
+        r.style.border=''; r.style.background='';
+      });
+      row.style.border='2px solid var(--ok)';
+      row.style.borderRadius='10px';
+      row.style.background='rgba(52,211,153,0.07)';
+      selectedTitle=t;
+    };
+
+    row.appendChild(v); row.appendChild(b); titlesDiv.appendChild(row);
+
+    // Auto-select first title
+    if(i===0){ row.click(); }
+  });
+
+  document.getElementById('desc').textContent=d.description||'';
+
+  // ── GLOBAL STATE for tags + title refresh ──
+  window._tags       = [...(d.tags||[])];
+  window._tagScores  = Object.assign({}, d.tag_scores||{});
+  window._tagLang    = d.detected_language||'roman-urdu';
+  window._tagKw      = d.primary_keyword||'';
+  window._refreshRound = 0;  // round counter
+  window._titleKw    = d.primary_keyword||'';
+  window._titleLang  = d.detected_language||'roman-urdu';
+  window._titleSummary  = d.content_summary||'';
+  window._titleTranscript = d.transcript||'';
+  window._titleSubject = d.detected_subject||'';
+  window._titleNiche   = d.niche_fit||'';
+  renderTags();
+  // hashtags (alag)
+  const hg=document.getElementById('hashtags'); hg.innerHTML='';
+  (d.hashtags||[]).forEach(h=>{ const s=document.createElement('span'); s.className='tag'; s.textContent='#'+h; hg.appendChild(s); });
+  document.getElementById('hashraw').value=d.hashtags_string || (d.hashtags||[]).map(h=>'#'+h).join(' ');
+
+  // Keyword Highlight Map — kahan kahan use hua
+  const kwmap = document.getElementById('kwmap');
+  const allTags = d.tags || [];
+  const titleTxt = (d.titles&&d.titles[0]||'').toLowerCase();
+  const descTxt  = (d.description||'').toLowerCase();
+  if(allTags.length){
+    const tagRows = allTags.map(tag=>{
+      const tl = tag.toLowerCase();
+      const inTitle = titleTxt.includes(tl.split(' ')[0]);
+      const inDesc  = descTxt.includes(tl.split(' ')[0]);
+      const inTags  = true; // always in tags
+      const dots =
+        (inTitle?'<span title="Title mein" style="background:#60a5fa;color:#000;border-radius:4px;padding:1px 5px;font-size:10px;margin-right:3px">T</span>':'<span style="opacity:0.2;background:#252b3a;border-radius:4px;padding:1px 5px;font-size:10px;margin-right:3px">T</span>')+
+        (inDesc? '<span title="Description mein" style="background:#34d399;color:#000;border-radius:4px;padding:1px 5px;font-size:10px;margin-right:3px">D</span>':'<span style="opacity:0.2;background:#252b3a;border-radius:4px;padding:1px 5px;font-size:10px;margin-right:3px">D</span>')+
+        '<span title="Tags mein" style="background:#f59e0b;color:#000;border-radius:4px;padding:1px 5px;font-size:10px">V</span>';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid #1d2230">'+
+        '<span style="font-size:12px;color:#c7cee0;flex:1">'+tag+'</span>'+
+        '<div style="display:flex;gap:2px">'+dots+'</div></div>';
+    }).join('');
+    kwmap.style.display='block';
+    kwmap.innerHTML=
+      '<p class="lbl" style="margin:0 0 6px">🗺️ Keyword Map — kahan kahan use hua '+
+      '<span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">'+
+      '(<span style="background:#60a5fa;color:#000;padding:0 4px;border-radius:3px;font-size:10px">T</span>=Title '+
+      '<span style="background:#34d399;color:#000;padding:0 4px;border-radius:3px;font-size:10px">D</span>=Description '+
+      '<span style="background:#f59e0b;color:#000;padding:0 4px;border-radius:3px;font-size:10px">V</span>=Video Tags)</span></p>'+
+      '<div style="max-height:200px;overflow-y:auto;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px">'+
+      tagRows+'</div>';
+  } else kwmap.style.display='none';
+
+  // Real YouTube search keywords
+  const skw=document.getElementById('searchkw');
+  if(d.search_keywords && d.search_keywords.length){
+    skw.style.display='block';
+    skw.innerHTML='<p class="lbl">🔍 YouTube Search Insights <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">— log yeh search karte hain (sirf awareness ke liye — tags mein NAHI jaate)</span></p>'+
+      '<div class="tags">'+d.search_keywords.map(k=>'<span class="tag" style="background:#1a2040;border-color:#4a5280;color:#8a9bbf">🔍 '+k+'</span>').join('')+'</div>';
+  } else skw.style.display='none';
+
+  document.getElementById('hookscript').textContent = d.hook_script || '—';
+  document.getElementById('pinned').textContent = d.pinned_comment || '—';
+  document.getElementById('thumbtext').textContent = d.thumbnail_text || '—';
+  document.getElementById('thumbtip').innerHTML = d.thumbnail_tip ? '<b>🖼️ Thumbnail tip:</b> '+d.thumbnail_tip : '';
+  document.getElementById('hooktip').innerHTML  = d.hook_tip ? '<b>⏱️ Pehla frame:</b> '+d.hook_tip : '';
+
+  document.getElementById('seochecks').innerHTML='';
+
+  // ── Extra SEO data ──────────────────────────────────────────────────────
+  const ex = document.getElementById('seoextra'); ex.innerHTML='';
+
+  // Google Trends
+  const tr = d.trends || {};
+  if(tr.trend && tr.trend !== 'unavailable'){
+    const tcol = tr.trend.includes('up') ? 'var(--ok)' : tr.trend.includes('down') ? 'var(--acc)' : 'var(--acc2)';
+    ex.innerHTML += '<div class="card" style="padding:14px;margin-bottom:12px">'+
+      '<p class="lbl" style="margin:0 0 8px">📊 Google Trends — "'+(d.primary_keyword||'')+'"</p>'+
+      '<div style="font-size:14px">'+tr.trend+' &nbsp; <span style="color:'+tcol+'"><b>Interest: '+tr.score+'/100</b></span>'+
+      (tr.peak?' &nbsp; Peak: '+tr.peak:'')+'</div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-top:4px">High score = zyada log search kar rahe hain = post karo abhi</div>'+
+      '</div>';
+  }
+
+  // Competitor videos with thumbnails + clickable links
+  const comp = d.competitors || {};
+  if(comp.top_videos && comp.top_videos.length){
+    let cards = comp.top_videos.map(v => {
+      const vf = v.views>1e6?(v.views/1e6).toFixed(1)+'M':v.views>1e3?(v.views/1e3).toFixed(0)+'K':(v.views||'?');
+      const titleTxt = v.title.length>55 ? v.title.substring(0,53)+'…' : v.title;
+      // Extract video ID from URL
+      const vidId = v.url ? v.url.split('v=')[1] : '';
+      const thumbUrl = vidId ? 'https://i.ytimg.com/vi/'+vidId+'/mqdefault.jpg' : '';
+      const thumbEl = thumbUrl
+        ? '<img src="'+thumbUrl+'" style="width:120px;height:68px;object-fit:cover;border-radius:6px;flex-shrink:0" loading="lazy" onerror="this.style.display=\'none\'">'
+        : '<div style="width:120px;height:68px;background:#252b3a;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--mut);font-size:20px">▶</div>';
+      const card = '<a href="'+(v.url||'#')+'" target="_blank" style="text-decoration:none;color:inherit">'+
+        '<div style="display:flex;gap:10px;padding:8px;border-radius:10px;background:var(--card2);border:1px solid var(--line);margin-bottom:8px;transition:.15s" '+
+        'onmouseover="this.style.borderColor=\'#60a5fa\'" onmouseout="this.style.borderColor=\'var(--line)\'">'+
+        thumbEl+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:12px;color:#c7cee0;line-height:1.4;margin-bottom:4px">'+titleTxt+'</div>'+
+          '<div style="font-size:11px;color:var(--acc2);font-weight:700">'+vf+' views</div>'+
+          (v.url?'<div style="font-size:10px;color:var(--mut);margin-top:2px">▶ YouTube pe dekho</div>':'')
+        +'</div></div></a>';
+      return card;
+    }).join('');
+    ex.innerHTML += '<div class="card" style="padding:14px;margin-bottom:12px">'+
+      '<p class="lbl" style="margin:0 0 4px">🔥 Competitor Videos — "'+( d.primary_keyword||'')+'" keyword pe top ranking</p>'+
+      '<div style="font-size:11px;color:var(--mut);margin-bottom:10px">In videos ko dekho — yeh is topic pe best perform kar rahe hain</div>'+
+      cards+
+      (comp.avg_views?'<div style="font-size:11px;color:var(--mut);margin-top:4px">📊 Avg views: '+
+        (comp.avg_views>1e6?(comp.avg_views/1e6).toFixed(1)+'M':
+        comp.avg_views>1e3?(comp.avg_views/1e3).toFixed(0)+'K':comp.avg_views)+'</div>':'')+'</div>';
+  }
+
+  // Posting strategy
+  const ps = d.posting_strategy || {};
+  if(ps.best_time){
+    ex.innerHTML += '<div class="card" style="padding:14px;margin-bottom:12px">'+
+      '<p class="lbl" style="margin:0 0 8px">⏰ Upload Strategy</p>'+
+      '<div style="font-size:13px;line-height:1.8">'+
+      '📅 <b>Best days:</b> '+ps.best_days+'<br>'+
+      '🕐 <b>Best time:</b> <b style="color:var(--ok)">'+ps.best_time+'</b><br>'+
+      '💬 <b>First hour:</b> '+ps.first_hour+'<br>'+
+      '📈 <b>Frequency:</b> '+ps.frequency+'</div></div>';
+  }
+
+  out.style.display='block';
+  out.scrollIntoView({behavior:'smooth'});
+}
+
+// copy buttons (desc + tags)
+document.querySelectorAll('.copy[data-for]').forEach(b=>{
+  b.onclick=()=>{
+    const el=document.getElementById(b.dataset.for);
+    const txt=el.value!==undefined?el.value:el.textContent;
+    copyText(txt,b);
+  };
+});
+function copyText(txt,btn){
+  navigator.clipboard.writeText(txt).then(()=>{
+    const old=btn.textContent; btn.textContent='✓ Copied'; btn.classList.add('done');
+    setTimeout(()=>{btn.textContent=old;btn.classList.remove('done')},1400);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// GLOBAL TAG FUNCTIONS — properly accessible from onclick
+// ══════════════════════════════════════════════════════════
+
+function _tagScoreColor(sc){
+  return sc>=70?'#22c55e':sc>=50?'#f59e0b':'#ef4444';
+}
+
+function renderTags(){
+  const tg = document.getElementById('tags');
+  if(!tg) return;
+  tg.innerHTML='';
+  const tags = window._tags || [];
+  const scores = window._tagScores || {};
+
+  tags.forEach(function(tag, i){
+    const sc = scores[tag] || 0;
+    const el = document.createElement('span');
+    el.className = 'tag';
+    el.setAttribute('data-idx', i);
+
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'tscore';
+    scoreSpan.style.background = _tagScoreColor(sc);
+    scoreSpan.style.color = '#000';
+    scoreSpan.textContent = sc;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = tag;
+
+    const delSpan = document.createElement('span');
+    delSpan.className = 'tdel';
+    delSpan.title = 'Remove tag';
+    delSpan.textContent = '×';
+    delSpan.addEventListener('click', function(e){
+      e.stopPropagation();
+      removeTag(i);
+    });
+
+    el.appendChild(scoreSpan);
+    el.appendChild(labelSpan);
+    el.appendChild(delSpan);
+    tg.appendChild(el);
+  });
+
+  const str = tags.join(', ');
+  const raw = document.getElementById('tagsraw');
+  if(raw) raw.value = str;
+  const cnt = document.getElementById('tagcount');
+  if(cnt) cnt.textContent = '('+str.length+'/500 chars · '+tags.length+' tags)';
+}
+
+function removeTag(idx){
+  if(!window._tags) return;
+  window._tags.splice(idx, 1);
+  renderTags();
+}
+
+function addTagInput(){
+  const tg = document.getElementById('tags');
+  if(!tg) return;
+  const inp = document.createElement('input');
+  inp.className = 'tag-input';
+  inp.placeholder = 'tag likho + Enter';
+  inp.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      const val = inp.value.trim().toLowerCase().replace(/#/g,'');
+      if(val && window._tags && !window._tags.includes(val)){
+        window._tags.push(val);
+        if(!window._tagScores) window._tagScores = {};
+        window._tagScores[val] = 30;
+        renderTags();
+      }
+      inp.remove();
+    }
+    if(e.key === 'Escape') inp.remove();
+  });
+  tg.appendChild(inp);
+  inp.focus();
+}
+
+function copyTagsRaw(btn){
+  const str = (window._tags||[]).join(', ');
+  copyText(str, btn);
+}
+
+async function refreshTags(){
+  const btn = document.getElementById('refreshbtn');
+  if(!btn) return;
+  const origText = btn.textContent;
+  btn.textContent = '🔄 Loading...';
+  btn.disabled = true;
+
+  const suggestDiv = document.getElementById('tagSuggestions');
+
+  try{
+    if(!window._refreshRound) window._refreshRound = 0;
+    window._refreshRound++;
+
+    const resp = await fetch('/refresh_tags', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        keyword: window._tagKw || '',
+        language: window._tagLang || 'roman-urdu',
+        round: window._refreshRound
+      })
+    });
+    const j = await resp.json();
+    if(j.ok && j.tags && j.tags.length){
+      if(suggestDiv){
+        // Saare suggestions dikhao — added hain to ✓, nahi hain to +
+        suggestDiv.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+          '<b style="font-size:12px;color:var(--acc2)">💡 Tag Suggestions (Round '+window._refreshRound+') — ＋ click = add, ✓ = already added</b>'+
+          '<span style="font-size:11px;color:var(--mut);cursor:pointer" onclick="document.getElementById(\'tagSuggestions\').style.display=\'none\'">✕ Close</span></div>'+
+          '<div id="suggestTagsInner" class="tags"></div>';
+        suggestDiv.style.display = 'block';
+
+        const inner = document.getElementById('suggestTagsInner');
+        (j.tags||[]).forEach(function(tagText){
+          const sc   = (j.scores && j.scores[tagText]) || 30;
+          const col  = sc>=70?'#22c55e':sc>=50?'#f59e0b':'#ef4444';
+          const norm = tagText.toLowerCase().trim();
+          const alreadyAdded = (window._tags||[]).some(t => t.toLowerCase().trim() === norm);
+
+          const el = document.createElement('span');
+          el.className = 'tag';
+          el.style.transition = 'all 0.2s';
+
+          if(alreadyAdded){
+            el.style.opacity = '0.45'; el.style.cursor = 'default';
+            el.title = 'Pehle se add hai';
+            el.innerHTML =
+              '<span class="tscore" style="background:'+col+';color:#000">'+sc+'</span>'+
+              '<span>'+tagText+'</span>'+
+              '<span style="color:#34d399;font-size:11px">✓</span>';
+          } else {
+            el.style.cursor = 'pointer';
+            el.title = 'Click to add';
+            el.innerHTML =
+              '<span class="tscore" style="background:'+col+';color:#000">'+sc+'</span>'+
+              '<span>'+tagText+'</span>'+
+              '<span style="color:#34d399;font-weight:700;font-size:14px;margin-left:2px">＋</span>';
+            el.addEventListener('click', function(){
+              const curStr = (window._tags||[]).join(', ');
+              if(curStr.length + tagText.length + 2 > 490){
+                el.style.background='#3a2a14'; el.title='500 char limit!';
+                return;
+              }
+              if(!window._tags) window._tags=[];
+              if(!window._tagScores) window._tagScores={};
+              window._tags.push(tagText);
+              window._tagScores[tagText] = sc;
+              renderTags();
+              el.style.opacity='0.4'; el.style.pointerEvents='none';
+              el.querySelector('span:last-child').textContent='✓';
+            });
+          }
+          inner.appendChild(el);
+        });
+      }
+      const notAdded = (j.tags||[]).filter(t=>!(window._tags||[]).some(a=>a.toLowerCase()===t.toLowerCase()));
+      btn.textContent = '✅ '+notAdded.length+' new / '+(j.tags.length - notAdded.length)+' added';
+      setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 3000);
+    } else {
+      btn.textContent = '❌ ' + (j.error||'Error');
+      setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
+    }
+  } catch(e){
+    btn.textContent = '❌ Network error';
+    setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
+  }
+}
+
+// addSuggestedTag inline listener se handle ho raha hai (refreshTags mein)
+
+async function refreshTitles(){
+  const btn = document.getElementById('refreshTitleBtn');
+  if(!btn) return;
+  const orig = btn.textContent;
+  btn.textContent = '🔄 Generating...'; btn.disabled = true;
+  try{
+    // Pass current desc + tags for consistency
+    const currentDescText = (document.getElementById('desc')||{}).textContent||'';
+    const resp = await fetch('/refresh_titles',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        keyword: window._titleKw||'',
+        language: window._titleLang||'roman-urdu',
+        summary: window._titleSummary||'',
+        transcript: window._titleTranscript||'',
+        subject: window._titleSubject||'',
+        niche: window._titleNiche||'',
+        description: currentDescText.substring(0,300),
+        existing_tags: (window._tags||[]).slice(0,10)
+      })
+    });
+    const j = await resp.json();
+    if(j.ok && j.titles && j.titles.length){
+      renderTitlesList(j.titles);
+      btn.textContent = '✅ New titles!';
+      setTimeout(()=>{ btn.textContent=orig; btn.disabled=false; }, 2000);
+    } else {
+      btn.textContent = '❌ '+(j.error||'Error');
+      setTimeout(()=>{ btn.textContent=orig; btn.disabled=false; }, 2000);
+    }
+  } catch(e){
+    btn.textContent = '❌ Error';
+    setTimeout(()=>{ btn.textContent=orig; btn.disabled=false; }, 2000);
+  }
+}
+
+function renderTitlesList(titles, autoSync){
+  function titleScore(title, kw){
+    const t=title.toLowerCase(), k1=(kw||'').toLowerCase().split(' ')[0];
+    let pts=0;
+    if(k1 && t.indexOf(k1)>=0 && t.indexOf(k1)<46) pts+=10;
+    if(title.length>=40 && title.length<=65) pts+=7;
+    if(/[?!]/.test(title)||/\d/.test(title)) pts+=5;
+    if(!title.includes('#')) pts+=3;
+    return Math.min(100, Math.round(pts/25*100));
+  }
+  const titlesDiv = document.getElementById('titles');
+  titlesDiv.innerHTML = '';
+  titles.forEach(function(t, i){
+    const sc = titleScore(t, window._titleKw||'');
+    const scCol = sc>=80?'var(--ok)':sc>=60?'var(--acc2)':'var(--acc)';
+    const row = document.createElement('div'); row.className='row';
+    row.style.cursor='pointer'; row.style.userSelect='none'; row.style.transition='all 0.15s';
+    const v = document.createElement('div'); v.className='val title-val';
+    v.style.display='flex'; v.style.alignItems='center'; v.style.gap='10px';
+    // Sync indicator
+    const syncInd = document.createElement('span');
+    syncInd.id = 'syncInd_'+i;
+    syncInd.style.cssText = 'font-size:10px;color:var(--mut);margin-left:4px';
+    v.innerHTML='<span style="background:'+scCol+';color:#000;font-weight:800;font-size:11px;border-radius:5px;padding:2px 7px;min-width:34px;text-align:center;flex-shrink:0">'+sc+'</span>'+
+      '<span>'+(i===0?'⭐ ':'')+t+'</span>';
+    v.appendChild(syncInd);
+    const b = document.createElement('button'); b.className='copy'; b.textContent='Copy';
+    b.onclick=function(e){ e.stopPropagation(); copyText(t,b); };
+    row.onclick=function(){
+      document.querySelectorAll('#titles .row').forEach(function(r){ r.style.border=''; r.style.background=''; });
+      row.style.border='2px solid var(--ok)'; row.style.borderRadius='10px'; row.style.background='rgba(52,211,153,0.07)';
+    };
+    row.appendChild(v); row.appendChild(b); titlesDiv.appendChild(row);
+    if(i===0) row.click(); // auto-sync first title
+  });
+}
+
+async function syncMetadata(selectedTitle, indicator){
+  if(indicator) indicator.textContent = '⏳ syncing...';
+  try{
+    const resp = await fetch('/sync_metadata',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        title: selectedTitle,
+        language: window._titleLang||'roman-urdu',
+        summary: window._titleSummary||'',
+        transcript: window._titleTranscript||'',
+        subject: window._titleSubject||''
+      })
+    });
+    const j = await resp.json();
+    if(j.ok){
+      // Update description
+      const descEl = document.getElementById('desc');
+      if(descEl) descEl.textContent = j.description||'';
+      // Update primary keyword
+      if(j.primary_keyword){
+        window._tagKw = j.primary_keyword;
+        window._titleKw = j.primary_keyword;
+      }
+      // Update tags
+      if(j.tags && j.tags.length){
+        window._tags = [...j.tags];
+        renderTags();
+      }
+      if(indicator){ indicator.textContent = '✅ synced'; setTimeout(()=>{ indicator.textContent=''; },2000); }
+    } else {
+      if(indicator){ indicator.textContent = '❌'; setTimeout(()=>{ indicator.textContent=''; },2000); }
+    }
+  } catch(e){
+    if(indicator){ indicator.textContent = '❌'; setTimeout(()=>{ indicator.textContent=''; },2000); }
+  }
+}
+</script>
+</body>
+</html>
