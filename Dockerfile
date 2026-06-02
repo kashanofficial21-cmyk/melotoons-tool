@@ -22,6 +22,7 @@ COPY . .
 # Create uploads directory
 RUN mkdir -p /app/uploads
 
-EXPOSE 5055
+EXPOSE 7860
 
+ENV PORT=7860
 CMD ["python", "app.py"]

@@ -172,6 +172,25 @@
 
       <div id="seochecks" style="margin-top:18px"></div>
       <div id="seoextra" style="margin-top:18px"></div>
+
+      <!-- FIX CHAT BOX -->
+      <div id="fixbox" style="display:none;margin-top:20px">
+        <div style="background:var(--card2);border:1px solid #60a5fa;border-radius:14px;padding:16px">
+          <p class="lbl" style="margin:0 0 8px;color:#60a5fa">🛠️ Kuch fix karna hai? Yahan likho</p>
+          <div style="font-size:12px;color:var(--mut);margin-bottom:10px">
+            Examples: "description mein hashtags add karo" · "title aur engaging banao" · "tags mein health keywords add karo"
+          </div>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="fixInput"
+              style="flex:1;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:14px;color:var(--txt);outline:none"
+              placeholder="Instruction likho... (Enter dabao)"
+              onkeydown="if(event.key==='Enter') applyFix()">
+            <button class="btn" onclick="applyFix()" id="fixBtn"
+              style="width:auto;padding:10px 18px;margin:0;font-size:14px">Fix karo ✨</button>
+          </div>
+          <div id="fixMsg" style="font-size:13px;margin-top:8px;color:var(--ok);display:none"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -487,6 +506,7 @@ function render(d){
   }
 
   out.style.display='block';
+  document.getElementById('fixbox').style.display='block';
   out.scrollIntoView({behavior:'smooth'});
 }
 
@@ -681,6 +701,73 @@ async function refreshTags(){
 }
 
 // addSuggestedTag inline listener se handle ho raha hai (refreshTags mein)
+
+// ── FIX CHAT ────────────────────────────────────────────────────────────
+async function applyFix(){
+  const inp = document.getElementById('fixInput');
+  const btn = document.getElementById('fixBtn');
+  const msg = document.getElementById('fixMsg');
+  const instruction = (inp.value||'').trim();
+  if(!instruction) return;
+
+  btn.disabled=true; btn.textContent='⏳ Fix ho raha hai...';
+  msg.style.display='none';
+
+  // Gather current state
+  const currentDesc = (document.getElementById('desc')||{}).textContent||'';
+  const currentTitles = [...document.querySelectorAll('#titles .row')].map(r=>{
+    const span = r.querySelector('span.t-text') || r.querySelector('span:nth-child(2)');
+    return span ? span.textContent.replace('⭐ ','').trim() : '';
+  }).filter(Boolean);
+
+  try{
+    const resp = await fetch('/refine',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        instruction,
+        description: currentDesc,
+        tags: window._tags||[],
+        titles: currentTitles,
+        language: window._titleLang||'roman-urdu',
+        primary_keyword: window._titleKw||''
+      })
+    });
+    const j = await resp.json();
+    if(j.ok && j.result){
+      const r = j.result;
+      // Update description
+      if(r.description){
+        const descEl = document.getElementById('desc');
+        if(descEl) descEl.textContent = r.description;
+      }
+      // Update tags
+      if(r.tags && r.tags.length){
+        const cleaned = r.tags.map(t=>t.trim().toLowerCase().replace(/#/g,''));
+        window._tags = [...new Set(cleaned)];
+        renderTags();
+      }
+      // Update titles
+      if(r.titles && r.titles.length){
+        renderTitlesList(r.titles);
+      }
+      // Show message
+      msg.textContent = '✅ ' + (r.message||'Fix ho gaya!');
+      msg.style.color='var(--ok)';
+      msg.style.display='block';
+      inp.value='';
+    } else {
+      msg.textContent = '❌ ' + (j.error||'Kuch galat hua');
+      msg.style.color='var(--acc)';
+      msg.style.display='block';
+    }
+  } catch(e){
+    msg.textContent = '❌ Network error';
+    msg.style.color='var(--acc)';
+    msg.style.display='block';
+  }
+  btn.disabled=false; btn.textContent='Fix karo ✨';
+}
 
 async function refreshTitles(){
   const btn = document.getElementById('refreshTitleBtn');

@@ -298,6 +298,57 @@ def refresh_tags():
         return jsonify({"ok": False, "error": str(e)[:200]}), 500
 
 
+@app.route("/refine", methods=["POST"])
+def refine():
+    """User ki instruction se specific field fix karo."""
+    data = request.get_json() or {}
+    instruction = (data.get("instruction") or "").strip()
+    current_desc = (data.get("description") or "").strip()
+    current_tags = data.get("tags") or []
+    current_titles = data.get("titles") or []
+    language = (data.get("language") or "roman-urdu").strip()
+    primary_kw = (data.get("primary_keyword") or "").strip()
+
+    if not instruction:
+        return jsonify({"ok": False, "error": "Instruction missing"}), 400
+
+    lang_rule = "Roman Urdu/Hindi (Latin letters only)" if language in ("roman-urdu","hindi") else "English"
+
+    prompt = f"""You are a YouTube metadata editor. A creator gave ONE specific instruction.
+
+⚠️ STRICT RULE: Do ONLY what the instruction says. Do NOT change anything else.
+- If instruction says "add hashtags" → ONLY add hashtags to description. Keep everything else EXACTLY the same — same words, same length, same sentences.
+- If instruction says "fix title" → ONLY change titles. Description and tags stay identical.
+- NEVER shorten, rewrite, or improve anything that was not mentioned in the instruction.
+- NEVER add extra changes "for improvement" — only the exact requested change.
+
+CURRENT METADATA:
+- Description: {current_desc}
+- Tags: {', '.join(current_tags[:15])}
+- Titles: {current_titles[:3]}
+- Primary keyword: {primary_kw}
+- Language: {lang_rule}
+
+CREATOR'S INSTRUCTION: "{instruction}"
+
+Return JSON with ONLY the field(s) that changed (omit unchanged fields):
+{{
+  "description": "full description — IDENTICAL to original EXCEPT for the requested change",
+  "tags": ["only if tags were asked to change"],
+  "titles": ["only if titles were asked to change"],
+  "message": "1 line: exactly what was done"
+}}
+"""
+    try:
+        from core import llm as _llm
+        result = _llm.generate(prompt)
+        if not isinstance(result, dict):
+            return jsonify({"ok": False, "error": "Bad response"}), 500
+        return jsonify({"ok": True, "result": result})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+
+
 def _open_browser(url: str):
     try:
         webbrowser.open(url)
