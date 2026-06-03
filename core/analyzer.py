@@ -157,11 +157,19 @@ PRIMARY KEYWORD = TAG[0] (exact match from title).
   L2 LONG-TAIL (6-8): 3-5 word phrases log YouTube pe TYPE karte hain
                       e.g. "immunity boost karne wali sabziyan", "roz khane wali sabziyan"
                       e.g. "healthy vegetables for immunity", "vegetables for skin glow"
-  L3 BROAD (3-4):     single high-traffic words
-                      e.g. "animation", "cartoon", "sabziyan", "health", "shorts"
-  L4 RELATED/LSI (4-5): similar popular video topics (suggested sidebar anchor)
-                      e.g. "hindi health tips", "healthy eating hindi", "sehat ka raaz"
+  L3 BROAD (2-3):     CONTENT-SPECIFIC broad phrases (NEVER single generic words!)
+                      ❌ GALAT: "cartoon", "animation", "video" — yeh WRONG AUDIENCE laate hain!
+                      ✅ SAHI: "cat animation", "moral story animation", "hindi animated story"
+                      Rule: Broad tag mein ALWAYS video ka subject word hona chahiye
+  L4 RELATED/LSI (3-4): similar popular video topics (suggested sidebar anchor)
+                      ✅ ONLY if content is GENUINELY similar — no random popular terms
+                      ❌ KABHI NAHI: "doraemon", "dragon ball", "peppa pig" — agar video mein nahi
   L5 BRAND (2):       "melotoons", "melotoons shorts"
+
+⚠️ WRONG AUDIENCE PREVENTION (ZAROORI):
+Tags se wrong audience aati hai → woh swipe karte hain → retention kill → views ruk jaate hain!
+Is liye: har tag VIDEO KE ACTUAL CONTENT se match karna LAAZMI hai.
+Agar video mein billi hai → "cat story" sahi, "doraemon" BILKUL GALAT.
 
 TAGS SCORE checklist:
   ✓ tag[0] = primary keyword     → +30 pts

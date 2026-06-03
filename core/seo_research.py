@@ -63,16 +63,21 @@ _QUERY_WORDS = {
     "jata", "jate", "jati", "batao", "bataye", "bataen",
 }
 
+# Single generic words jo wrong audience laate hain
+_TOO_GENERIC_SINGLE = {"cartoon", "animation", "video", "movie", "film", "short", "funny"}
+
 def _relevant(s: str) -> bool:
     words = set(s.lower().split())
+    word_list = s.lower().split()
     # Filter irrelevant content
     if words & _IRRELEVANT: return False
-    # Filter query-format (starts with question word OR has 2+ question words)
-    word_list = s.lower().split()
+    # Filter query-format
     if word_list and word_list[0] in _QUERY_WORDS: return False
     if len(words & _QUERY_WORDS) >= 2: return False
-    # Filter too long (>5 words — too query-like)
+    # Filter too long (>5 words)
     if len(word_list) > 5: return False
+    # Filter single generic words (wrong audience)
+    if len(word_list) == 1 and word_list[0] in _TOO_GENERIC_SINGLE: return False
     return True
 
 
