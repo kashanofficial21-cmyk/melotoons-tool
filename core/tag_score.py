@@ -68,12 +68,52 @@ def _competition_score(tag: str) -> int:
 
 
 def score_tag(tag: str, language: str = "english") -> int:
-    """Single tag ka score (0-100)."""
+    """Single tag ka score (0-100) — TubeBuddy style: volume + competition."""
     hl = "hi" if language in ("roman-urdu", "hindi") else "en"
     pos = _yt_autocomplete_position(tag, hl=hl)
     vol = _volume_score(pos)
     comp = _competition_score(tag)
     return min(100, vol + comp)
+
+
+def keyword_opportunity_score(keyword: str, language: str = "english") -> dict:
+    """TubeBuddy-style keyword opportunity score.
+
+    Score 0-100:
+    - 70+: Great opportunity (high volume, low competition)
+    - 40-69: Good opportunity
+    - <40: Avoid (too competitive or too low volume)
+    """
+    hl = "hi" if language in ("roman-urdu", "hindi") else "en"
+    pos = _yt_autocomplete_position(keyword, hl=hl)
+
+    # Volume: higher autocomplete position = more searches
+    vol_score = _volume_score(pos)  # 0-60
+
+    # Competition: word count + length as proxy
+    comp_score = _competition_score(keyword)  # 0-40
+
+    total = min(100, vol_score + comp_score)
+
+    if total >= 70:
+        grade = "🟢 Great opportunity"
+        advice = "Yeh keyword target karo — volume achha, competition manageable"
+    elif total >= 40:
+        grade = "🟡 Good opportunity"
+        advice = "Theek hai — try kar sakte hain"
+    else:
+        grade = "🔴 Avoid"
+        advice = "Ya to bahut low volume, ya bahut high competition"
+
+    return {
+        "keyword": keyword,
+        "score": total,
+        "volume_score": vol_score,
+        "competition_score": comp_score,
+        "grade": grade,
+        "advice": advice,
+        "autocomplete_position": pos,
+    }
 
 
 def score_tags_bulk(tags: list[str], language: str = "english",

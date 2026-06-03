@@ -349,6 +349,22 @@ Return JSON with ONLY the field(s) that changed (omit unchanged fields):
         return jsonify({"ok": False, "error": str(e)[:200]}), 500
 
 
+@app.route("/keyword_opportunity", methods=["POST"])
+def keyword_opportunity():
+    """TubeBuddy-style keyword opportunity score."""
+    data = request.get_json() or {}
+    keyword = (data.get("keyword") or "").strip()
+    language = (data.get("language") or "roman-urdu").strip()
+    if not keyword:
+        return jsonify({"ok": False, "error": "Keyword missing"}), 400
+    try:
+        from core.tag_score import keyword_opportunity_score
+        result = keyword_opportunity_score(keyword, language)
+        return jsonify({"ok": True, "result": result})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+
+
 def _open_browser(url: str):
     try:
         webbrowser.open(url)

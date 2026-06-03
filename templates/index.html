@@ -80,7 +80,21 @@
 <body>
 <div class="wrap">
   <h1>🎬 MeloToons <span>Title Generator</span></h1>
-  <div class="sub">Video upload karo → content ki zubaan mein viral title, SEO description aur discovery tags. (Powered by Gemini)</div>
+  <div class="sub">Video upload karo → viral title, SEO description, tags, keyword score — vidIQ + TubeBuddy style. (Powered by Groq)</div>
+
+  <!-- KEYWORD OPPORTUNITY CHECKER (TubeBuddy style) -->
+  <div class="card" style="margin-bottom:18px">
+    <p class="lbl" style="margin:0 0 8px">🔍 Keyword Opportunity Checker <span style="color:var(--mut);font-weight:400;text-transform:none;font-size:11px">— TubeBuddy style score: volume vs competition</span></p>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="kwInput" placeholder="Keyword likho... jaise 'billi ki kahani'" class="hint" style="flex:1;margin:0">
+      <select id="kwLang" class="hint" style="width:160px;margin:0">
+        <option value="roman-urdu">Roman Urdu</option>
+        <option value="english">English</option>
+      </select>
+      <button class="copy" onclick="checkKeyword()" id="kwBtn" style="white-space:nowrap">Check Score</button>
+    </div>
+    <div id="kwResult" style="margin-top:10px;display:none"></div>
+  </div>
 
   {% if not configured %}
   <div class="notcfg">⚠️ <b>Koi LLM key set nahi.</b> <code>.env</code> mein <code>GROQ_API_KEY</code> ya <code>GEMINI_API_KEY</code> daalo.</div>
@@ -129,9 +143,12 @@
       </div>
       <div id="titles"></div>
 
-      <p class="lbl" style="margin-top:18px">📄 Description</p>
+      <p class="lbl" style="margin-top:18px">📄 Description
+        <span id="descWordCount" style="color:var(--ok);font-weight:600;text-transform:none;letter-spacing:0"></span>
+        <span style="color:var(--mut);font-weight:400;text-transform:none;font-size:11px"> 🟠 = keyword found</span>
+      </p>
       <div class="row">
-        <div class="val" id="desc"></div>
+        <div class="val" id="desc" style="white-space:pre-wrap;line-height:1.6"></div>
         <button class="copy" data-for="desc">Copy</button>
       </div>
 
@@ -206,6 +223,37 @@ drop.onclick=()=>fileIn.click();
 ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('drag')}));
 drop.addEventListener('drop',ev=>{ if(ev.dataTransfer.files.length) setFile(ev.dataTransfer.files[0]); });
 fileIn.onchange=()=>{ if(fileIn.files.length) setFile(fileIn.files[0]); };
+
+async function checkKeyword(){
+  const kw = document.getElementById('kwInput').value.trim();
+  const lang = document.getElementById('kwLang').value;
+  const btn = document.getElementById('kwBtn');
+  const res = document.getElementById('kwResult');
+  if(!kw) return;
+  btn.textContent = '⏳...'; btn.disabled=true;
+  try{
+    const r = await fetch('/keyword_opportunity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,language:lang})});
+    const j = await r.json();
+    if(j.ok){
+      const d = j.result;
+      const col = d.score>=70?'var(--ok)':d.score>=40?'var(--acc2)':'var(--acc)';
+      res.style.display='block';
+      res.innerHTML =
+        '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+        '<div style="font-size:32px;font-weight:900;color:'+col+'">'+d.score+'<span style="font-size:14px;color:var(--mut)">/100</span></div>'+
+        '<div>'+
+          '<div style="font-size:14px;font-weight:700">'+d.grade+'</div>'+
+          '<div style="font-size:12px;color:var(--mut)">'+d.advice+'</div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-top:4px">Volume: '+d.volume_score+'/60 &nbsp; Competition score: '+d.competition_score+'/40</div>'+
+        '</div>'+
+        '</div>'+
+        '<div style="height:8px;background:#252b3a;border-radius:4px;margin-top:8px;overflow:hidden">'+
+        '<div style="height:100%;width:'+d.score+'%;background:'+col+'"></div></div>'+
+        '<div style="font-size:11px;color:var(--mut);margin-top:4px">🟢 70+ = Great &nbsp; 🟡 40-70 = Good &nbsp; 🔴 <40 = Avoid</div>';
+    }
+  } catch(e){}
+  btn.textContent='Check Score'; btn.disabled=false;
+}
 
 function updateLangNote(){
   const v=document.getElementById('lang').value;
@@ -380,7 +428,20 @@ function render(d){
     if(i===0){ row.click(); }
   });
 
-  document.getElementById('desc').textContent=d.description||'';
+  // Description with keyword highlight (vidIQ style - orange highlight)
+  const descEl = document.getElementById('desc');
+  const rawDesc = d.description || '';
+  const kwToHighlight = (d.primary_keyword || '').toLowerCase();
+  const kw1Highlight = kwToHighlight.split(' ')[0];
+  if(kw1Highlight && rawDesc){
+    const regex = new RegExp('('+kw1Highlight.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', 'gi');
+    descEl.innerHTML = rawDesc.replace(/\n/g,'<br>').replace(regex,
+      '<mark style="background:#f97316;color:#fff;border-radius:3px;padding:0 2px">$1</mark>');
+  } else {
+    descEl.textContent = rawDesc;
+  }
+  const wc = rawDesc.split(/\s+/).filter(Boolean).length;
+  document.getElementById('descWordCount').textContent = '('+wc+' words)';
 
   // ── GLOBAL STATE for tags + title refresh ──
   window._tags       = [...(d.tags||[])];
@@ -493,17 +554,32 @@ function render(d){
         comp.avg_views>1e3?(comp.avg_views/1e3).toFixed(0)+'K':comp.avg_views)+'</div>':'')+'</div>';
   }
 
-  // Posting strategy
+  // Posting strategy + extra tips
   const ps = d.posting_strategy || {};
   if(ps.best_time){
     ex.innerHTML += '<div class="card" style="padding:14px;margin-bottom:12px">'+
-      '<p class="lbl" style="margin:0 0 8px">⏰ Upload Strategy</p>'+
-      '<div style="font-size:13px;line-height:1.8">'+
-      '📅 <b>Best days:</b> '+ps.best_days+'<br>'+
-      '🕐 <b>Best time:</b> <b style="color:var(--ok)">'+ps.best_time+'</b><br>'+
-      '💬 <b>First hour:</b> '+ps.first_hour+'<br>'+
-      '📈 <b>Frequency:</b> '+ps.frequency+'</div></div>';
+      '<p class="lbl" style="margin:0 0 10px">⏰ Upload Strategy (TubeBuddy Best Time to Publish)</p>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">'+
+      '<div style="background:var(--card2);border-radius:8px;padding:10px">📅 <b>Best Days</b><br><span style="color:var(--ok)">'+ps.best_days+'</span></div>'+
+      '<div style="background:var(--card2);border-radius:8px;padding:10px">🕐 <b>Best Time</b><br><span style="color:var(--ok);font-weight:700">'+ps.best_time+'</span></div>'+
+      '<div style="background:var(--card2);border-radius:8px;padding:10px">💬 <b>First Hour Rule</b><br><span style="color:var(--mut);font-size:11px">'+ps.first_hour+'</span></div>'+
+      '<div style="background:var(--card2);border-radius:8px;padding:10px">📈 <b>Posting Frequency</b><br><span style="color:var(--mut);font-size:11px">'+ps.frequency+'</span></div>'+
+      '</div>'+
+      '<div style="margin-top:10px;background:#1a2a14;border-radius:8px;padding:10px;font-size:12px;color:#86efac">'+
+      '💡 <b>Morningfame tip:</b> Pehle 48 ghante sabse zaroori — iss time mein views aur engagement algorithm ko signal deta hai.'+
+      '</div></div>';
   }
+
+  // Click Magnet tips (TubeBuddy feature)
+  ex.innerHTML += '<div class="card" style="padding:14px;margin-bottom:12px">'+
+    '<p class="lbl" style="margin:0 0 10px">🧲 Click Magnet Tips (TubeBuddy style)</p>'+
+    '<div style="font-size:13px;line-height:1.8;color:var(--mut)">'+
+    '🖼️ <b style="color:var(--txt)">Thumbnail:</b> Expressive face close-up + 3-4 word bold text + bright contrasting colors<br>'+
+    '📝 <b style="color:var(--txt)">Title front-load:</b> Primary keyword first 40 chars — most important for click<br>'+
+    '👁️ <b style="color:var(--txt)">Curiosity gap:</b> Title mein ending hint karo, reveal mat karo<br>'+
+    '⏱️ <b style="color:var(--txt)">Hook:</b> Pehle 3 sec mein sabse emotional/cute/shocking frame<br>'+
+    '🔄 <b style="color:var(--txt)">Loop:</b> Video end naturally start pe loop ho jaaye — rewatch = more algorithm push'+
+    '</div></div>';
 
   out.style.display='block';
   document.getElementById('fixbox').style.display='block';

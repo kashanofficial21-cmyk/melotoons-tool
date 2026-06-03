@@ -75,3 +75,140 @@ t=2026-06-02T19:06:25+0500 lvl=info msg=start pg=/api/tunnels id=61a6955a547c4d6
 t=2026-06-02T19:06:25+0500 lvl=info msg=end pg=/api/tunnels id=61a6955a547c4d68 status=200 dur=0s
 t=2026-06-02T19:06:55+0500 lvl=info msg=start pg=/api/tunnels id=308c72ca5bdeecbc
 t=2026-06-02T19:06:55+0500 lvl=info msg=end pg=/api/tunnels id=308c72ca5bdeecbc status=200 dur=0s
+t=2026-06-02T20:03:26+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-02T20:03:26+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-02T20:03:26+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-02T20:03:26+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T20:03:26+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T20:03:26+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T20:03:26+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T20:03:27+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://jumbo-ultimatum-landlady.ngrok-free.dev
+t=2026-06-02T20:03:28+0500 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": EOF"
+t=2026-06-02T20:03:44+0500 lvl=info msg="received stop request" obj=app stopReq="{err:<nil> restart:false}"
+t=2026-06-02T20:03:44+0500 lvl=info msg="session closing" obj=tunnels.session err=nil
+t=2026-06-02T20:03:44+0500 lvl=info msg="accept failed" obj=tunnels.session obj=csess id=fe496dd95958 err="reconnecting session closed"
+t=2026-06-02T20:03:44+0500 lvl=info msg="failed to accept connection: Listener closed" obj=tunnels.session clientid=2e3737afd487b98401e9ef39d4447b07
+t=2026-06-02T20:03:44+0500 lvl=warn msg="Stopping forwarder" name=command_line acceptErr="failed to accept connection: Listener closed"
+t=2026-06-02T20:03:44+0500 lvl=info msg="no more state changes" obj=tunnels.session
+t=2026-06-02T20:03:44+0500 lvl=warn msg="Error restarting forwarder" name=command_line err="failed to start tunnel: session closed"
+t=2026-06-03T11:18:38+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-03T11:18:38+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-03T11:18:38+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-03T11:18:38+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-03T11:18:38+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-03T11:18:40+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T11:18:40+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T11:18:41+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://jumbo-ultimatum-landlady.ngrok-free.dev
+t=2026-06-03T11:18:47+0500 lvl=info msg=start pg=/api/tunnels id=ff0b8f12363f4fb3
+t=2026-06-03T11:18:47+0500 lvl=info msg=end pg=/api/tunnels id=ff0b8f12363f4fb3 status=200 dur=997µs
+t=2026-06-03T11:19:17+0500 lvl=info msg=start pg=/api/tunnels id=cbe98acc80ea30c0
+t=2026-06-03T11:19:17+0500 lvl=info msg=end pg=/api/tunnels id=cbe98acc80ea30c0 status=200 dur=0s
+t=2026-06-03T11:19:48+0500 lvl=info msg=start pg=/api/tunnels id=18aac65b4c5a7bc9
+t=2026-06-03T11:19:48+0500 lvl=info msg=end pg=/api/tunnels id=18aac65b4c5a7bc9 status=200 dur=0s
+t=2026-06-03T11:20:18+0500 lvl=info msg=start pg=/api/tunnels id=6e4370c2d1a12dd5
+t=2026-06-03T11:20:18+0500 lvl=info msg=end pg=/api/tunnels id=6e4370c2d1a12dd5 status=200 dur=0s
+t=2026-06-03T11:20:48+0500 lvl=info msg=start pg=/api/tunnels id=086ae217650be38d
+t=2026-06-03T11:20:48+0500 lvl=info msg=end pg=/api/tunnels id=086ae217650be38d status=200 dur=0s
+t=2026-06-03T11:21:19+0500 lvl=info msg=start pg=/api/tunnels id=e404a420ecc812dc
+t=2026-06-03T11:21:19+0500 lvl=info msg=end pg=/api/tunnels id=e404a420ecc812dc status=200 dur=0s
+t=2026-06-03T11:21:49+0500 lvl=info msg=start pg=/api/tunnels id=46cf4d27cf59b72b
+t=2026-06-03T11:21:49+0500 lvl=info msg=end pg=/api/tunnels id=46cf4d27cf59b72b status=200 dur=0s
+t=2026-06-03T11:22:20+0500 lvl=info msg=start pg=/api/tunnels id=8ef5ae7de04a151c
+t=2026-06-03T11:22:20+0500 lvl=info msg=end pg=/api/tunnels id=8ef5ae7de04a151c status=200 dur=0s
+t=2026-06-03T11:22:50+0500 lvl=info msg=start pg=/api/tunnels id=7238c184fa5caa4f
+t=2026-06-03T11:22:50+0500 lvl=info msg=end pg=/api/tunnels id=7238c184fa5caa4f status=200 dur=1.5148ms
+t=2026-06-03T11:23:21+0500 lvl=info msg=start pg=/api/tunnels id=b5b4f133cea73759
+t=2026-06-03T11:23:21+0500 lvl=info msg=end pg=/api/tunnels id=b5b4f133cea73759 status=200 dur=0s
+t=2026-06-03T11:23:51+0500 lvl=info msg=start pg=/api/tunnels id=541dfc4919d2803b
+t=2026-06-03T11:23:51+0500 lvl=info msg=end pg=/api/tunnels id=541dfc4919d2803b status=200 dur=0s
+t=2026-06-03T11:24:21+0500 lvl=info msg=start pg=/api/tunnels id=0ff1d228f8351b94
+t=2026-06-03T11:24:21+0500 lvl=info msg=end pg=/api/tunnels id=0ff1d228f8351b94 status=200 dur=850.1µs
+t=2026-06-03T11:24:51+0500 lvl=info msg=start pg=/api/tunnels id=b40467628cf1829e
+t=2026-06-03T11:24:51+0500 lvl=info msg=end pg=/api/tunnels id=b40467628cf1829e status=200 dur=0s
+t=2026-06-03T11:25:22+0500 lvl=info msg=start pg=/api/tunnels id=b3403f8463994111
+t=2026-06-03T11:25:22+0500 lvl=info msg=end pg=/api/tunnels id=b3403f8463994111 status=200 dur=0s
+t=2026-06-03T11:25:52+0500 lvl=info msg=start pg=/api/tunnels id=4aeadaacb185432c
+t=2026-06-03T11:25:52+0500 lvl=info msg=end pg=/api/tunnels id=4aeadaacb185432c status=200 dur=0s
+t=2026-06-03T11:26:22+0500 lvl=info msg=start pg=/api/tunnels id=76e1bf370cb223c5
+t=2026-06-03T11:26:22+0500 lvl=info msg=end pg=/api/tunnels id=76e1bf370cb223c5 status=200 dur=0s
+t=2026-06-03T11:26:52+0500 lvl=info msg=start pg=/api/tunnels id=eefdaa3ae5cc1b97
+t=2026-06-03T11:26:52+0500 lvl=info msg=end pg=/api/tunnels id=eefdaa3ae5cc1b97 status=200 dur=0s
+t=2026-06-03T11:27:22+0500 lvl=info msg=start pg=/api/tunnels id=30a2c809974e291e
+t=2026-06-03T11:27:22+0500 lvl=info msg=end pg=/api/tunnels id=30a2c809974e291e status=200 dur=0s
+t=2026-06-03T11:27:52+0500 lvl=info msg=start pg=/api/tunnels id=3a91cdeeb871ed98
+t=2026-06-03T11:27:52+0500 lvl=info msg=end pg=/api/tunnels id=3a91cdeeb871ed98 status=200 dur=0s
+t=2026-06-03T11:28:23+0500 lvl=info msg=start pg=/api/tunnels id=0214d218412d1a7c
+t=2026-06-03T11:28:23+0500 lvl=info msg=end pg=/api/tunnels id=0214d218412d1a7c status=200 dur=103.6µs
+t=2026-06-03T11:28:53+0500 lvl=info msg=start pg=/api/tunnels id=2d12a284ca915d5f
+t=2026-06-03T11:28:53+0500 lvl=info msg=end pg=/api/tunnels id=2d12a284ca915d5f status=200 dur=0s
+t=2026-06-03T11:29:23+0500 lvl=info msg=start pg=/api/tunnels id=88afd52c6b22d38f
+t=2026-06-03T11:29:23+0500 lvl=info msg=end pg=/api/tunnels id=88afd52c6b22d38f status=200 dur=0s
+t=2026-06-03T11:29:53+0500 lvl=info msg=start pg=/api/tunnels id=1869d10d30d71f38
+t=2026-06-03T11:29:53+0500 lvl=info msg=end pg=/api/tunnels id=1869d10d30d71f38 status=200 dur=0s
+t=2026-06-03T11:30:24+0500 lvl=info msg=start pg=/api/tunnels id=ec112c5a87934d1d
+t=2026-06-03T11:30:24+0500 lvl=info msg=end pg=/api/tunnels id=ec112c5a87934d1d status=200 dur=0s
+t=2026-06-03T11:30:54+0500 lvl=info msg=start pg=/api/tunnels id=f7223b63e92f48fe
+t=2026-06-03T11:30:54+0500 lvl=info msg=end pg=/api/tunnels id=f7223b63e92f48fe status=200 dur=0s
+t=2026-06-03T11:31:24+0500 lvl=info msg=start pg=/api/tunnels id=a6a8933f7774c01a
+t=2026-06-03T11:31:24+0500 lvl=info msg=end pg=/api/tunnels id=a6a8933f7774c01a status=200 dur=0s
+t=2026-06-03T11:31:54+0500 lvl=info msg=start pg=/api/tunnels id=e64f3ac742e2c9bf
+t=2026-06-03T11:31:54+0500 lvl=info msg=end pg=/api/tunnels id=e64f3ac742e2c9bf status=200 dur=0s
+t=2026-06-03T11:32:24+0500 lvl=info msg=start pg=/api/tunnels id=cc495fb391303689
+t=2026-06-03T11:32:24+0500 lvl=info msg=end pg=/api/tunnels id=cc495fb391303689 status=200 dur=0s
+t=2026-06-03T11:32:54+0500 lvl=info msg=start pg=/api/tunnels id=7e60dc6ea0052227
+t=2026-06-03T11:32:54+0500 lvl=info msg=end pg=/api/tunnels id=7e60dc6ea0052227 status=200 dur=0s
+t=2026-06-03T11:33:25+0500 lvl=info msg=start pg=/api/tunnels id=6f1ed9bf035594f0
+t=2026-06-03T11:33:25+0500 lvl=info msg=end pg=/api/tunnels id=6f1ed9bf035594f0 status=200 dur=0s
+t=2026-06-03T11:33:55+0500 lvl=info msg=start pg=/api/tunnels id=21acec8335d91bac
+t=2026-06-03T11:33:55+0500 lvl=info msg=end pg=/api/tunnels id=21acec8335d91bac status=200 dur=0s
+t=2026-06-03T11:34:25+0500 lvl=info msg=start pg=/api/tunnels id=a4ed02fedfcbdfed
+t=2026-06-03T11:34:25+0500 lvl=info msg=end pg=/api/tunnels id=a4ed02fedfcbdfed status=200 dur=0s
+t=2026-06-03T11:34:55+0500 lvl=info msg=start pg=/api/tunnels id=d448b14d6cbbf662
+t=2026-06-03T11:34:55+0500 lvl=info msg=end pg=/api/tunnels id=d448b14d6cbbf662 status=200 dur=587.2µs
+t=2026-06-03T11:35:25+0500 lvl=info msg=start pg=/api/tunnels id=e2fe91d9540c35e5
+t=2026-06-03T11:35:25+0500 lvl=info msg=end pg=/api/tunnels id=e2fe91d9540c35e5 status=200 dur=0s
+t=2026-06-03T11:35:56+0500 lvl=info msg=start pg=/api/tunnels id=c752cffd47f5fc49
+t=2026-06-03T11:35:56+0500 lvl=info msg=end pg=/api/tunnels id=c752cffd47f5fc49 status=200 dur=0s
+t=2026-06-03T11:36:26+0500 lvl=info msg=start pg=/api/tunnels id=9a71e5dadce5068c
+t=2026-06-03T11:36:26+0500 lvl=info msg=end pg=/api/tunnels id=9a71e5dadce5068c status=200 dur=0s
+t=2026-06-03T11:36:56+0500 lvl=info msg=start pg=/api/tunnels id=1057f0382e09201a
+t=2026-06-03T11:36:56+0500 lvl=info msg=end pg=/api/tunnels id=1057f0382e09201a status=200 dur=0s
+t=2026-06-03T11:37:26+0500 lvl=info msg=start pg=/api/tunnels id=cd8e21919e6e3f3a
+t=2026-06-03T11:37:26+0500 lvl=info msg=end pg=/api/tunnels id=cd8e21919e6e3f3a status=200 dur=0s
+t=2026-06-03T11:37:57+0500 lvl=info msg=start pg=/api/tunnels id=6c82d1b4f0bab03f
+t=2026-06-03T11:37:57+0500 lvl=info msg=end pg=/api/tunnels id=6c82d1b4f0bab03f status=200 dur=0s
+t=2026-06-03T11:38:27+0500 lvl=info msg=start pg=/api/tunnels id=2f6fe93e4c0dea5e
+t=2026-06-03T11:38:27+0500 lvl=info msg=end pg=/api/tunnels id=2f6fe93e4c0dea5e status=200 dur=0s
+t=2026-06-03T11:38:57+0500 lvl=info msg=start pg=/api/tunnels id=21e90f4bf54f0aa2
+t=2026-06-03T11:38:57+0500 lvl=info msg=end pg=/api/tunnels id=21e90f4bf54f0aa2 status=200 dur=0s
+t=2026-06-03T11:39:27+0500 lvl=info msg=start pg=/api/tunnels id=ef548e2e34993605
+t=2026-06-03T11:39:27+0500 lvl=info msg=end pg=/api/tunnels id=ef548e2e34993605 status=200 dur=997.2µs
+t=2026-06-03T11:39:58+0500 lvl=info msg=start pg=/api/tunnels id=ce709d71bcd9785f
+t=2026-06-03T11:39:58+0500 lvl=info msg=end pg=/api/tunnels id=ce709d71bcd9785f status=200 dur=0s
+t=2026-06-03T11:40:40+0500 lvl=info msg=start pg=/api/tunnels id=c84c9cd8c4469ef2
+t=2026-06-03T11:40:40+0500 lvl=info msg=end pg=/api/tunnels id=c84c9cd8c4469ef2 status=200 dur=996µs
+t=2026-06-03T11:41:11+0500 lvl=info msg=start pg=/api/tunnels id=9373e4901249e83f
+t=2026-06-03T11:41:11+0500 lvl=info msg=end pg=/api/tunnels id=9373e4901249e83f status=200 dur=997.1µs
+t=2026-06-03T11:41:45+0500 lvl=info msg=start pg=/api/tunnels id=21606d4886698a77
+t=2026-06-03T11:41:45+0500 lvl=info msg=end pg=/api/tunnels id=21606d4886698a77 status=200 dur=997.5µs
+t=2026-06-03T11:42:15+0500 lvl=info msg=start pg=/api/tunnels id=0bd5cc89fd4032f6
+t=2026-06-03T11:42:15+0500 lvl=info msg=end pg=/api/tunnels id=0bd5cc89fd4032f6 status=200 dur=521.8µs
+t=2026-06-03T11:42:45+0500 lvl=info msg=start pg=/api/tunnels id=2851d98ae32a837f
+t=2026-06-03T11:42:45+0500 lvl=info msg=end pg=/api/tunnels id=2851d98ae32a837f status=200 dur=996.8µs
+t=2026-06-03T11:43:15+0500 lvl=info msg=start pg=/api/tunnels id=5ff4ca83cbc6fbb7
+t=2026-06-03T11:43:15+0500 lvl=info msg=end pg=/api/tunnels id=5ff4ca83cbc6fbb7 status=200 dur=0s
+t=2026-06-03T11:43:45+0500 lvl=info msg=start pg=/api/tunnels id=5ede2b2e8ce95e1a
+t=2026-06-03T11:43:45+0500 lvl=info msg=end pg=/api/tunnels id=5ede2b2e8ce95e1a status=200 dur=0s
+t=2026-06-03T11:44:16+0500 lvl=info msg=start pg=/api/tunnels id=1e1c9dda673c6a8a
+t=2026-06-03T11:44:16+0500 lvl=info msg=end pg=/api/tunnels id=1e1c9dda673c6a8a status=200 dur=0s
+t=2026-06-03T11:44:46+0500 lvl=info msg=start pg=/api/tunnels id=d1f26115b1cd4920
+t=2026-06-03T11:44:46+0500 lvl=info msg=end pg=/api/tunnels id=d1f26115b1cd4920 status=200 dur=0s
+t=2026-06-03T11:55:08+0500 lvl=info msg="no configuration paths supplied"
+t=2026-06-03T11:55:08+0500 lvl=info msg="using configuration at default config path" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-03T11:55:08+0500 lvl=info msg="open config file" path=C:\\Users\\Lenovo\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-03T11:55:08+0500 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-03T11:55:12+0500 lvl=warn msg="can't bind default web address, trying alternatives" obj=web addr=127.0.0.1:4040
+t=2026-06-03T11:55:12+0500 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4041 allow_hosts=[]
+t=2026-06-03T11:55:15+0500 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T11:55:15+0500 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T11:55:16+0500 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5055 url=https://jumbo-ultimatum-landlady.ngrok-free.dev
