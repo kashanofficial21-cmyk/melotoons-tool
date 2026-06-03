@@ -22,9 +22,23 @@ from typing import Optional
 # ── 1) YouTube Autocomplete (multi-layer) ─────────────────────────────────
 
 _PREFIXES = {
-    "english": ["", "how to ", "best ", "why ", "what is ", "top "],
-    "roman-urdu": ["", "kaise ", "kyun ", "kya hai ", "best ", "top "],
-    "hindi": ["", "कैसे ", "क्यों ", "क्या है ", "best "],
+    "english": ["", "animated ", "cute ", "best ", "top ", "short "],
+    "roman-urdu": ["", "pyaari ", "cute ", "dil ko chhoone wali ", "mazedaar ", "best "],
+    "hindi": ["", "प्यारी ", "best ", "cute "],
+}
+
+# MeloToons niche-specific base tags (hamesha relevant)
+_NICHE_BASE_TAGS = {
+    "roman-urdu": [
+        "melotoons", "animated kahani", "moral kahani hindi",
+        "cute cartoon story", "desi animated shorts", "bachon ki kahani",
+        "3d animated story", "hindi moral story", "emotional animated story"
+    ],
+    "english": [
+        "melotoons", "animated moral story", "cute animal story",
+        "3d animated short", "kids moral story", "hindi animated story",
+        "emotional cartoon", "short animated film"
+    ],
 }
 
 def _yt_autocomplete(query: str, hl: str = "en") -> list[str]:
@@ -118,16 +132,22 @@ def get_keyword_clusters(primary: str, language: str = "english") -> dict:
                     tag_only.append(s)
         time.sleep(0.05)
 
-    # Tags: clean + dedupe
+    # Tags: clean + dedupe from autocomplete
     tags, tag_seen = [], set()
     for s in tag_only:
         t = re.sub(r"[#\n\r]", "", s).strip().lower()
         if t and t not in tag_seen and len(t) <= 50:
             tag_seen.add(t); tags.append(t)
 
+    # MeloToons niche base tags — hamesha add karo
+    base = _NICHE_BASE_TAGS.get(language, _NICHE_BASE_TAGS["roman-urdu"])
+    for bt in base:
+        if bt not in tag_seen:
+            tag_seen.add(bt); tags.append(bt)
+
     return {
-        "all_suggestions": all_suggestions[:20],  # sab — awareness ke liye
-        "tag_ready": tags[:20],                    # sirf relevant — tags ke liye
+        "all_suggestions": all_suggestions[:20],
+        "tag_ready": tags[:22],
     }
 
 

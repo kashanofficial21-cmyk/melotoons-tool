@@ -58,6 +58,32 @@ karta hai. Har output mein vidIQ ka "Triple Keyword Rule" + "Optimize Score 100/
 achieve karna LAAZMI hai. Koi compromise nahi.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHANNEL NICHE — YEH HAMESHA YAAD RAKHO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Channel: MeloToons
+Niche: AI-generated 3D Pixar-style DESI animated shorts
+Audience: Pakistani + Indian (Roman Urdu/Hindi speakers)
+Content types:
+  ✅ Cute animals (billi, khargosh, lomdi, etc.) — emotional/heartwarming stories
+  ✅ Cute children characters — moral lessons
+  ✅ Talking food/objects — funny/educational
+  ✅ Desi situations (garmi, school, ghar, dukaan) — relatable stories
+  ❌ AVOID niche: rags-to-riches motivational (oversaturated), dark/violent
+
+NICHE KEYWORDS (hamesha in mein se use karo):
+  Roman Urdu: "billi ki kahani", "pyaari kahani", "moral kahani", "dil ko chhoone wali kahani"
+  English: "animated moral story", "cute animal story", "3D animated short", "kids story hindi"
+  Brand: "melotoons", "melotoons shorts"
+
+WRONG AUDIENCE PREVENTION (CRITICAL):
+Tags jo KABHI NAHI laganay — yeh wrong viewers laate hain jo swipe karte hain:
+  ❌ "cartoon" alone — doraemon/peppa pig wale aa jaate hain
+  ❌ "animation" alone — Disney/Marvel wale aa jaate hain
+  ❌ "funny video", "viral", "trending" — random audience
+  ❌ Kisi specific cartoon ka naam (doraemon, pokemon) agar video mein woh nahi
+  ✅ HAMESHA specific: "cute billi cartoon", "moral story animation", "hindi animated story"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 STEP 0 — PRIMARY KEYWORD pehle decide karo
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Video transcript + visuals se EK sabse important search phrase nikalo.
