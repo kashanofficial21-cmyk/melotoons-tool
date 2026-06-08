@@ -35,197 +35,162 @@ def is_configured() -> bool:
 
 
 # --------------------------------------------------------------------------- #
+# Base tags — MeloToons channel ke liye hamesha high daily search wale tags
+# Yeh EVERY video mein auto-add honge (content-specific tags ke saath)
+# --------------------------------------------------------------------------- #
+_BASE_TAGS = [
+    "new animated kahani",
+    "animated story hindi urdu",
+    "3d animated kahani",
+    "baccho ki kahaniya",
+    "animated moral story hindi",
+    "animated shorts hindi",
+    "cartoon story hindi",
+    "baccho ki kahani cartoon",
+    "hindi urdu animated story",
+    "melotoons",
+    "melotoons shorts",
+]
+
+# --------------------------------------------------------------------------- #
 # Prompt — yahi tool ka dimaag hai
 # --------------------------------------------------------------------------- #
 
 _SYSTEM_PROMPT = """\
-⚠️ SCRIPT RULE — PEHLE PADHO, PHIR KAAM KARO ⚠️
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  LANGUAGE_MODE = roman-urdu  →  EVERY WORD in Latin/English letters ONLY
-  ✅ CORRECT: "Yeh 5 sabziyan rozana khao, 30 din mein farq dekho"
-  ❌ WRONG:   "यह 5 सब्जियां रोज खाओ"  ← Devanagari HARAM HAI roman-urdu mode mein
-  ❌ WRONG:   "یہ 5 سبزیاں"             ← Arabic/Nastaliq bhi NAHI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚨 GOLDEN RULE — IS KE BAGHAIR KUCH NAHI HOGA 🚨
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IS VIDEO KA ASLI SUBJECT JO TRANSCRIPT/VISUALS MEIN HAI — WOHI USE KARO.
+SYSTEM PROMPT KE KISI BHAI EXAMPLE KO REAL CONTENT MAT SAMJHO.
 
-  LANGUAGE_MODE = english     →  Everything in English
-  LANGUAGE_MODE = hindi       →  ONLY then use Devanagari (हिंदी)
+❌ FORBIDDEN: Agar transcript mein "billi" nahi → titles mein "Billi Ki Kahani" BILKUL NAHI
+❌ FORBIDDEN: Agar transcript mein "sabzi/fruit" nahi → "Doctor ne chhupaya" wale titles NAHI
+❌ FORBIDDEN: Template se copy-paste titles — har video ALAG hoti hai
 
-This rule overrides EVERYTHING. If you output Devanagari in roman-urdu mode,
-your entire response is WRONG and will be rejected. Use a-z letters only.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ PROCESS:
+  1. PEHLE transcript + visuals parho → ASLI subject identify karo
+  2. PHIR us subject ke liye titles/tags banao
+  3. Agar transcript mein koi character/topic hai → WAHI use karo, koi aur nahi
 
-Tum vidIQ Boost level ka YouTube SEO expert ho — MeloToons channel ke liye kaam
-karta hai. Har output mein vidIQ ka "Triple Keyword Rule" + "Optimize Score 100/100"
-achieve karna LAAZMI hai. Koi compromise nahi.
+LANGUAGE RULE:
+  LANGUAGE_MODE = roman-urdu  → SIRF Latin/English letters (a-z). NO Devanagari. NO Arabic script.
+  LANGUAGE_MODE = english     → Natural English only.
+  LANGUAGE_MODE = hindi       → Devanagari Hindi script.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tum vidIQ Boost level ka YouTube SEO expert ho — MeloToons channel ke liye.
+Har output mein vidIQ "Triple Keyword Rule" + "Optimize Score 100/100" achieve karo.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CHANNEL NICHE — YEH HAMESHA YAAD RAKHO
+CHANNEL INFO (context only — content force mat karo)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Channel: MeloToons
-Niche: AI-generated 3D Pixar-style DESI animated shorts
+Channel: MeloToons — AI 3D Pixar-style desi animated shorts
 Audience: Pakistani + Indian (Roman Urdu/Hindi speakers)
-Content types:
-  ✅ Cute animals (billi, khargosh, lomdi, etc.) — emotional/heartwarming stories
-  ✅ Cute children characters — moral lessons
-  ✅ Talking food/objects — funny/educational
-  ✅ Desi situations (garmi, school, ghar, dukaan) — relatable stories
-  ❌ AVOID niche: rags-to-riches motivational (oversaturated), dark/violent
+Possible content types (jo VIDEO MEIN HAI woh dekho):
+  • Cute animals (jo bhi video mein hai — dog, cat, bird, etc.)
+  • Cute children characters
+  • Talking food/objects
+  • Desi situations (school, ghar, dukaan, etc.)
+  ❌ Avoid: rags-to-riches motivational, dark/violent
 
-NICHE KEYWORDS (hamesha in mein se use karo):
-  Roman Urdu: "billi ki kahani", "pyaari kahani", "moral kahani", "dil ko chhoone wali kahani"
-  English: "animated moral story", "cute animal story", "3D animated short", "kids story hindi"
-  Brand: "melotoons", "melotoons shorts"
-
-WRONG AUDIENCE PREVENTION (CRITICAL):
-Tags jo KABHI NAHI laganay — yeh wrong viewers laate hain jo swipe karte hain:
-  ❌ "cartoon" alone — doraemon/peppa pig wale aa jaate hain
-  ❌ "animation" alone — Disney/Marvel wale aa jaate hain
-  ❌ "funny video", "viral", "trending" — random audience
-  ❌ Kisi specific cartoon ka naam (doraemon, pokemon) agar video mein woh nahi
-  ✅ HAMESHA specific: "cute billi cartoon", "moral story animation", "hindi animated story"
+BRAND TAGS (always include): "melotoons", "melotoons shorts"
+WRONG TAGS (never use): "cartoon" alone, "animation" alone, "viral", "trending", "funny video"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 0 — PRIMARY KEYWORD pehle decide karo
+STEP 0 — TRANSCRIPT SE ACTUAL WORDS COPY KARO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Video transcript + visuals se EK sabse important search phrase nikalo.
-YEH KEYWORD TEEN JAGAH EXACT SAME AANA CHAHIYE (vidIQ Triple Keyword Rule):
-  [A] Title ke PEHLE 40 characters mein
-  [B] Description ki PEHLI line (~125 chars) mein WORD-FOR-WORD
-  [C] Tags list ka PEHLA tag
+LANGUAGE_MODE = {mode}
 
-Agar [A][B][C] mein exact match nahi → score 100 nahi aayega. Ensure karo.
+MANDATORY FIRST ACTION:
+  Transcript mein se 3-5 KEY NOUNS identify karo (character, topic, action, setting).
+  LANGUAGE CONVERSION RULE:
+    - Agar LANGUAGE_MODE = roman-urdu → Devanagari/Arabic words ko NATURAL Roman Urdu mein likho
+    - English loanwords bilkul OK hain: "fruits", "health", "doctor", "school", etc.
+    - ❌ FORBIDDEN: Devanagari copy-paste into Roman Urdu keyword (jaise "फूरूट्स" → write "Fruits" not "Phuruts")
+    - ✅ CORRECT: "फूरूट्स खाओ" → Roman Urdu keyword: "Fruits Khao Sehat Banao"
+    - ✅ CORRECT: "बिल्ली ने सीखा" → Roman Urdu keyword: "Billi Ne Seekha" (natural transliteration)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 1 — LANGUAGE (output ki zubaan)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-LANGUAGE_MODE = {mode} (neeche inject hoga)
-  english    → sab kuch natural English mein
-  roman-urdu → SIRF Roman/Latin letters (a-z) — "Roz subah yeh 5 sabziyan khao"
-               Devanagari (हिंदी script) KABHI NAHI — ek bhi character nahi
-  hindi      → Devanagari Hindi script
-  auto       → transcript/visuals se detect karo (English audio → English output)
+  Example: transcript "Ahmed ne school mein sabak seekha" → keyword: "Ahmed School Sabak Story"
+  Example: transcript "ek kutte ne apni zindagi bacha li" → keyword: "Kutta Zindagi Bacha Story"
+  Example: transcript "10 minute mein weight lose karo" → keyword: "10 Minute Weight Loss Tips"
+  Example: transcript "Once a child was walking..." → keyword: "Child Walking Story Moral" (english mode)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 2 — 5 TITLES (vidIQ AI Title Generator — 9 emotion types se)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-VIDEO KE ACTUAL TRANSCRIPT + VISUALS pe based — GENERIC nahi.
-Har title: primary keyword PEHLE 40 chars mein + 1 emoji + NO # + 40-60 chars.
+  ❌ DO NOT INVENT: Agar transcript mein "kahani" nahi → primary keyword mein "kahani" mat lagao
+  ❌ DO NOT INVENT: Agar transcript mein "billi" nahi → "billi" mat lagao
+  ❌ DO NOT INVENT: Agar transcript mein "moral" nahi → "moral story" mat lagao
+  ✅ USE TRANSCRIPT CONTENT: Primary keyword = natural translation of actual transcript words
 
-vidIQ ke 9 emotion types mein se 5 use karo:
-VIRAL TITLE PATTERNS — har video type ke liye alag approach:
+PRIMARY KEYWORD = transcript ke actual content se natural 3-5 word phrase (in LANGUAGE_MODE).
+  NO template defaults. NO "ek kahani", NO "dil ko chhoone wali" unless transcript mein hai.
 
-🥦 HEALTH/FOOD video ho to:
-  T1 DOCTOR RAAZ: "Doctor ne yeh [food] kyun chhupaya? 😱" — authority + mystery
-  T2 SHOCKING FACT: "90% log nahi jaante [food] kya karta hai body ko 🤯"
-  T3 CHALLENGE: "Rozana [food] khao, [N] din mein doctor hairaan ho jayega 😮"
-  T4 BEFORE/AFTER: "[Food] khana band kiya to kya hoga? Jaanke dar jaoge 😨"
-  T5 SECRET: "Yeh [food] ka raaz sirf doctors jaante the, ab tum bhi jano 🔥"
-
-📖 MORAL STORY ho to:
-  T1 CLIFF HANGER: "Jab [character] ne [action] kiya... phir jo hua 😢"
-  T2 EMOTIONAL: "[Character] ne sirf [small thing] kiya aur sab kuch badal gaya 🥺"
-  T3 QUESTION HOOK: "Kya aap bina rone ke yeh kahani sun sakte hain? 😭"
-  T4 SHOCK: "Usne [action] kiya tha, tab kisi ne soch bhi nahi tha ke... 😱"
-  T5 LESSON: "Is chhoti si galti ne uski poori zindagi badal di 💔"
-
-😺 CUTE ANIMAL ho to:
-  T1 EMPATHY: "Jab [animal] ko [situation] mein dekha to dil pighal gaya 🥺"
-  T2 TRANSFORMATION: "[Animal] ne yeh seekha aur sab hairan reh gaye ✨"
-  T3 RESCUE: "Koi uski madad nahi karta tha, tab [character] aaya 😭💛"
-
-🔑 TITLE FORMULA (har case mein):
-  PRIMARY KEYWORD + EMOTIONAL HOOK + SUSPENSE (ending ka hint, reveal nahi)
-  Max 60 chars. 1 emoji. VIDEO KE ASLI CONTENT se — generic nahi.
-
-RHYMING/FLOW check karo: title bolne mein smooth lage, awkward na lage.
-
-TITLE SCORE checklist (100/100 ke liye):
-  ✓ primary keyword first 40 chars → +30 pts
-  ✓ length 40-60 chars             → +20 pts
-  ✓ emotion/curiosity (?/!/number) → +20 pts
-  ✓ exactly 1 emoji                → +15 pts
-  ✓ no # hashtag                   → +10 pts
-  ✓ specific to video content      → +5 pts
+TEEN JAGAH SAME KEYWORDS:
+  [TITLE] → primary keyword pehle 40 chars mein
+  [DESCRIPTION] → line 1 mein EXACT primary keyword
+  [TAGS] → tag[0] = primary keyword
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 3 — DESCRIPTION (SEO-optimized, 150+ words)
+STEP 1 — 5 TITLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-LINE 1 (~125 chars): primary keyword EXACT + compelling hook. ENDING reveal nahi.
-  Example: "5 sabziyan jo rozana khaoge to immunity 10x hogi — yeh raaz sirf..."
-LINE 2-3: keyword VARIATIONS naturally use karo (synonyms, related phrases, long-tail).
-  Example: "healthy vegetables", "sehat ke liye sabziyan", "immunity boost karne ka tarika"
-ENGAGEMENT Q: Relatable sawaal jo comment trigger kare.
-  Example: "Aap mein se kitne log rozana yeh khate hain? Comment mein batao 👇"
-CTA: Like + Subscribe (1 line).
-HASHTAGS (SIRF 3, description ke END mein):
-  #1 = primary topic specific (e.g. #SabziyonKeFayde)
-  #2 = #Shorts (HAMESHA)
-  #3 = niche/format (e.g. #HindiAnimation ya #MoralStory)
-  YouTube ke pehle 3 hashtags title ke UPAR float karte hain — isliye best 3 pehle.
+Rules: primary keyword first 40 chars + 1 emoji + NO # + 40-60 chars total.
 
-DESCRIPTION SCORE checklist:
-  ✓ primary keyword line 1 mein   → +25 pts
-  ✓ 150+ words                    → +20 pts
-  ✓ keyword variations line 2-3   → +15 pts
-  ✓ engagement question           → +15 pts
-  ✓ CTA present                   → +15 pts
-  ✓ exactly 3 hashtags            → +10 pts
+5 EMOTIONAL HOOKS — write in LANGUAGE_MODE language (english=English, roman-urdu=Roman Urdu):
+  HOOK 1 — CURIOSITY:   "[primary_keyword] — [curiosity phrase in LANGUAGE_MODE] 😱"
+  HOOK 2 — EMOTION:     "[transcript_character/subject] [emotional action from video] 🥺"
+  HOOK 3 — QUESTION:    "[Question about transcript_topic in LANGUAGE_MODE]? 🤔"
+  HOOK 4 — SHOCK:       "[transcript_fact/event] — [shock phrase in LANGUAGE_MODE] 😮"
+  HOOK 5 — LESSON:      "[transcript_theme/moral] — [lesson phrase in LANGUAGE_MODE] 💡"
+
+LANGUAGE EXAMPLES:
+  english mode:    "Elephants Tied With Rope — This Will Shock You 😱"
+  roman-urdu mode: "Haathi Rassi Se Bandha — Yeh Sun Kar Hairaan Ho Jaoge 😱"
+
+⚠️ CRITICAL: Replace [transcript_*] with ONLY words/phrases found in the actual transcript above.
+   ALL titles must be in LANGUAGE_MODE — NO mixing English titles with Roman Urdu hooks or vice versa.
+
+SCORE: keyword first 40 chars (+30), length 40-60 (+20), emotion hook (+20), 1 emoji (+15), no # (+10)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 4 — TAGS (vidIQ 5-layer, NO #, fill 400-480 chars)
+STEP 3 — DESCRIPTION (150+ words)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-YouTube 500-char tag limit ka MAXIMUM use karo. 20-30 tags, 400-480 chars TOTAL.
-NO # symbol. NO duplicates. NO "viral/trending/song/status/lyrics/usa/uk".
-PRIMARY KEYWORD = TAG[0] (exact match from title).
-
-5-LAYER formula (har layer se tags do — 3-5 word PHRASES preferred):
-  L1 EXACT (3-4):     primary keyword exact + direct variants
-                      e.g. "5 sabziyan", "paanch sabziyan ke fayde", "sabziyan benefits"
-  L2 LONG-TAIL (6-8): 3-5 word phrases log YouTube pe TYPE karte hain
-                      e.g. "immunity boost karne wali sabziyan", "roz khane wali sabziyan"
-                      e.g. "healthy vegetables for immunity", "vegetables for skin glow"
-  L3 BROAD (2-3):     CONTENT-SPECIFIC broad phrases (NEVER single generic words!)
-                      ❌ GALAT: "cartoon", "animation", "video" — yeh WRONG AUDIENCE laate hain!
-                      ✅ SAHI: "cat animation", "moral story animation", "hindi animated story"
-                      Rule: Broad tag mein ALWAYS video ka subject word hona chahiye
-  L4 RELATED/LSI (3-4): similar popular video topics (suggested sidebar anchor)
-                      ✅ ONLY if content is GENUINELY similar — no random popular terms
-                      ❌ KABHI NAHI: "doraemon", "dragon ball", "peppa pig" — agar video mein nahi
-  L5 BRAND (2):       "melotoons", "melotoons shorts"
-
-⚠️ WRONG AUDIENCE PREVENTION (ZAROORI):
-Tags se wrong audience aati hai → woh swipe karte hain → retention kill → views ruk jaate hain!
-Is liye: har tag VIDEO KE ACTUAL CONTENT se match karna LAAZMI hai.
-Agar video mein billi hai → "cat story" sahi, "doraemon" BILKUL GALAT.
-
-TAGS SCORE checklist:
-  ✓ tag[0] = primary keyword     → +30 pts
-  ✓ 20-30 tags                   → +25 pts
-  ✓ 400-480 chars total          → +25 pts
-  ✓ no # symbol                  → +20 pts
+LINE 1: primary keyword EXACT + hook. Ending reveal nahi.
+LINE 2-3: keyword variations (synonyms, related phrases from actual content).
+ENGAGEMENT Q: Comment trigger (👇).
+CTA: Like + Subscribe.
+CHAPTERS: 0:00 Shuruat / 0:05 [actual topic] / 0:45 Moral
+HASHTAGS (exactly 3, end mein): #[ActualTopic] #Shorts #[NicheFormat]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 5 — YOUTUBE SETTINGS + EXTRAS
+STEP 4 — TAGS (400-480 chars, NO #, 20-30 tags)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-video_category: Film & Animation | Education | Entertainment | Pets & Animals |
-  Howto & Style | Comedy | People & Blogs (video dekh ke SAHI category choose karo)
-video_language: Hindi | Urdu | English (video mein JO BOLA, wahi)
-hook_script: pehle 3 sec ka EXACT hook — kya bolna/dikhana hai taake swipe na ho
-pinned_comment: engagement sawaal pin karne ke liye
-thumbnail_text: 2-4 word bold text thumbnail pe
+L1 EXACT (3-4):    primary keyword + direct variants (actual subject words)
+L2 LONG-TAIL (6-8): "[actual subject] ki kahani", "[actual theme] animated", etc.
+L3 BROAD (2-3):    "[actual subject] animation", "hindi animated story", "[actual type] cartoon"
+L4 RELATED (3-4):  similar topics ONLY if genuinely related
+L5 BRAND (2):      "melotoons", "melotoons shorts"
+
+⚠️ Every tag must relate to ACTUAL video content. No guessing. No defaults.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SELF-VERIFICATION (return se pehle YEH CHECK karo)
+STEP 5 — SETTINGS + EXTRAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Return karne se PEHLE verify karo:
-  [ ] primary_keyword SAAREY 5 titles ke first 40 chars mein hai? (SABSE ZAROORI — koi bhi title select ho, SEO 100% rahe)
-  [ ] primary_keyword description line 1 mein EXACT hai?
-  [ ] primary_keyword tags[0] mein hai?
-  [ ] titles sab 40-60 chars hain?
-  [ ] description 150+ words hai?
-  [ ] hashtags exactly 3 hain?
-  [ ] tags total 400-480 chars hain?
-  [ ] koi Devanagari nahi (roman-urdu mode mein)?
-Agar koi check fail → fix karo phir return karo.
+video_category: Film & Animation | Education | Entertainment | Pets & Animals | Comedy (video se match)
+video_language: Hindi | Urdu | English (jo video mein bola gaya)
+hook_script: pehle 3 sec EXACT hook
+pinned_comment: engagement sawaal
+thumbnail_text: 2-4 bold words (actual subject)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FINAL CHECK (return se pehle)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [ ] Kya koi bhi title mein aisa word hai jo transcript/visuals mein NAHI tha? → Fix karo
+  [ ] primary_keyword saarey 5 titles ke first 40 chars mein?
+  [ ] primary_keyword description line 1 mein EXACT?
+  [ ] primary_keyword tags[0] mein?
+  [ ] Titles 40-60 chars?
+  [ ] Description 150+ words?
+  [ ] Hashtags exactly 3?
+  [ ] Tags 400-480 chars?
+  [ ] roman-urdu mode mein koi Devanagari nahi?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 JSON OUTPUT (sirf yeh, koi aur text nahi)
@@ -240,7 +205,7 @@ JSON OUTPUT (sirf yeh, koi aur text nahi)
   "niche_fit": "strong|ok|weak",
   "warning": "agar weak to wajah, warna ''",
   "titles": ["T1", "T2", "T3", "T4", "T5"],
-  "description": "full SEO description — line1 + variations + question + CTA + 3 hashtags",
+  "description": "full SEO description — line1 + variations + chapters(0:00/0:05/0:45) + question + CTA + 3 hashtags",
   "hashtags": ["TopicTag", "Shorts", "NicheTag"],
   "tags": ["primary keyword", "long tail phrase", "... 20-30 tags, 400-480 chars, NO #"],
   "hook_script": "pehle 3 sec exact hook",
@@ -290,19 +255,42 @@ def analyze_video(path: str, extra_hint: str = "", lang_pref: str = "auto",
     if lang_pref not in LANG_MODES:
         lang_pref = "auto"
 
+    # Wrap log to survive Windows cp1252 encoding errors (Devanagari/emoji in output)
+    _raw_log = log
+    def log(msg):
+        try:
+            _raw_log(str(msg))
+        except (UnicodeEncodeError, UnicodeDecodeError, OSError):
+            pass
+
     # 1) Whisper + Frames PARALLEL — dono ek saath chalao
     import concurrent.futures as _cf
 
     tr = None
     visual_desc = ""
 
+    _whisper_status = {"msg": "", "ok": False}
+
     def _run_whisper():
         if not use_transcript:
+            _whisper_status["msg"] = "skip"
             return None
         try:
             from . import transcribe as _tr
-            return _tr.transcribe(path, log=log)
+            _msgs = []
+            def _wlog(x):
+                _msgs.append(x)
+                log(x)
+            r = _tr.transcribe(path, log=_wlog)
+            if r and r.get("text"):
+                _whisper_status["ok"] = True
+                _whisper_status["msg"] = f"OK {len(r['text'])} chars lang={r.get('language','?')}"
+            else:
+                last = [m for m in _msgs if "[whisper]" in m]
+                _whisper_status["msg"] = last[-1] if last else "no_result"
+            return r
         except Exception as e:
+            _whisper_status["msg"] = str(e)[:100]
             log(f"[analyzer] transcript skip: {str(e)[:80]}")
             return None
 
@@ -329,7 +317,7 @@ def analyze_video(path: str, extra_hint: str = "", lang_pref: str = "auto",
         if has_audio and tr.get("language"):
             from . import transcribe as _tr_mod
             eff_lang = _tr_mod.suggested_mode(tr["language"])
-            log(f"[analyzer] audio language: {tr['language']} → {eff_lang}")
+            log(f"[analyzer] audio language: {tr['language']} -> {eff_lang}")
         else:
             eff_lang = "roman-urdu"
 
@@ -345,50 +333,65 @@ def analyze_video(path: str, extra_hint: str = "", lang_pref: str = "auto",
         except Exception:
             pass
 
-    # 3) Prompt banao
-    prompt = _SYSTEM_PROMPT.replace("{mode}", eff_lang) + f"\n\nLANGUAGE_MODE = {eff_lang}\n"
+    # 3) Prompt banao — VIDEO CONTENT PEHLE, rules baad mein (LLM actual content ko prioritize kare)
+    import uuid as _uuid
+    req_id = _uuid.uuid4().hex[:12]  # Groq cache break karne ke liye — har request unique
 
-    if not has_audio and visual_desc:
-        # No voiceover — visuals are THE primary source
-        prompt += (
-            f"\n⚠️ IS VIDEO MEIN KOI VOICEOVER/AUDIO NAHI HAI.\n"
-            f"VISUALS HI PRIMARY SOURCE HAIN — inhe carefully analyze karo:\n"
-            f'"""\n{visual_desc}\n"""\n'
-            "Character ka appearance, emotions, actions, setting, story arc, theme — sab visuals se samjho.\n"
-            "Titles/description SIRF visual content pe based karo — koi generic assumption nahi.\n"
-        )
-    elif visual_desc:
-        prompt += (
-            f"\nVIDEO VISUALS (supporting context):\n"
-            f'"""\n{visual_desc}\n"""\n'
-        )
+    # Pehle VIDEO-SPECIFIC content inject karo
+    video_context = f"REQUEST_ID: {req_id}\n\n"
+    video_context += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+    video_context += "⭐ IS VIDEO KA ACTUAL CONTENT (PEHLE PADHO — YAHI PRIMARY SOURCE HAI)\n"
+    video_context += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 
     if has_audio:
-        prompt += (
-            f"\nAUDIO TRANSCRIPT (Whisper, language='{tr['language']}'):\n"
-            f'"""\n{tr["text"][:2500]}\n"""\n'
-            "Transcript + visuals DONO se content samjho.\n"
+        video_context += (
+            f"AUDIO TRANSCRIPT (Whisper, language='{tr['language']}') — YEH ASLI SCRIPT HAI:\n"
+            f'"""\n{tr["text"][:2500]}\n"""\n\n'
+            "↑ Is transcript se EXACT content, characters, story samjho. Generic mat banao.\n"
+        )
+    else:
+        video_context += "⚠️ IS VIDEO MEIN Kोई VOICEOVER NAHI MILA — VISUALS PE DEPEND KARO.\n"
+
+    if visual_desc:
+        label = "VIDEO VISUALS (PRIMARY — koi audio nahi)" if not has_audio else "VIDEO VISUALS (supporting context)"
+        video_context += (
+            f"\n{label}:\n"
+            f'"""\n{visual_desc}\n"""\n'
+            "↑ Characters, setting, actions, emotions — sab visuals se samjho. Generic mat banao.\n"
         )
 
     if extra_hint.strip():
-        prompt += f"\nEXTRA HINT / KEYWORD: {extra_hint.strip()}\n"
+        video_context += f"\nEXTRA HINT (user ne bataya): {extra_hint.strip()}\n"
 
-    if extra_hint.strip():
-        prompt += f"\nEXTRA HINT: {extra_hint.strip()}\n"
+    if not has_audio and not visual_desc:
+        video_context += "\n⚠️ KHABARDAAR: Is video ka koi transcript aur koi visual description nahi mila.\nSirf jo kuch pata hai us pe based karo. Results generic ho sakte hain.\n"
+
+    # Ab system prompt attach karo (rules BAAD MEIN)
+    prompt = video_context + "\n" + _SYSTEM_PROMPT.replace("{mode}", eff_lang) + f"\n\nLANGUAGE_MODE = {eff_lang}\n"
 
     import concurrent.futures
 
     # 4) Pehle LLM chalao — actual primary_keyword pata chale
+    log("=" * 60)
+    log(f"[DEBUG] has_audio={has_audio}, has_visual={bool(visual_desc)}, extra_hint='{extra_hint[:50]}'")
+    log(f"[DEBUG] transcript preview: '{tr['text'][:200] if tr else 'EMPTY'}'")
+    log(f"[DEBUG] visual preview: '{visual_desc[:200] if visual_desc else 'EMPTY'}'")
+    log("=" * 60)
     log("[analyzer] LLM generating metadata ...")
     try:
         from . import llm as _llm
         data = _llm.generate(prompt, log=log)
     except Exception as e:
         raise AnalyzerError(str(e))
+    log(f"[DEBUG] LLM primary_keyword='{data.get('primary_keyword','?')}' subject='{data.get('detected_subject','?')}'")
+    log(f"[DEBUG] LLM title[0]='{(data.get('titles') or [''])[0]}'")
+    log("=" * 60)
 
     result = _normalize(data)
     result["transcript"]      = tr["text"] if tr else ""
     result["whisper_language"] = tr["language"] if tr else ""
+    result["whisper_status"]   = _whisper_status["msg"]
+    result["has_visual"]       = bool(visual_desc)
 
     # 5) Ab ACTUAL primary_keyword se SEO research karo (relevant keywords aayenge)
     actual_kw = result.get("primary_keyword", "").strip() or extra_hint.strip()
@@ -408,30 +411,45 @@ def analyze_video(path: str, extra_hint: str = "", lang_pref: str = "auto",
         log(f"[seo] skip: {str(e)[:80]}")
         seo_data = {}
 
-    result = _normalize(data)
-    result["transcript"] = tr["text"] if tr else ""
-    result["whisper_language"] = tr["language"] if tr else ""
-
-    # 6) SEO keyword tags ko LLM tags mein merge karo
+    # (result already set above — do NOT call _normalize again)
+    # 6) SEO keyword tags + BASE TAGS ko LLM tags mein merge karo
     try:
-        existing = set(t.lower() for t in result.get("tags", []))
+        llm_tags = result.get("tags", [])
+        existing = set(t.lower() for t in llm_tags)
+
         new_tags = [t for t in seo_data.get("keyword_tags", [])
                     if t.lower() not in existing]
         for w in seo_data.get("competitors", {}).get("common_keywords", []):
             if w.lower() not in existing:
                 new_tags.append(w); existing.add(w.lower())
-        merged = result["tags"] + new_tags
+
+        # Base tags guaranteed — filter only those not already present
+        base_tags_to_add = [t for t in _BASE_TAGS if t.lower() not in existing]
+
+        # Priority order:
+        #   1. Primary keyword tags (first 4 from LLM — most specific)
+        #   2. Base tags (always-on MeloToons tags — MUST be included)
+        #   3. Remaining LLM content tags (filtered: max 40 chars — sentences nahi, keywords chahiye)
+        #   4. SEO research tags (filtered: max 40 chars)
+        primary_tags   = llm_tags[:4]
+        content_tags   = [t for t in llm_tags[4:] if len(t) <= 40]
+        seo_tags       = [t for t in new_tags      if len(t) <= 40]
+        merged = primary_tags + base_tags_to_add + content_tags + seo_tags
+
         packed, chars = [], 0
         for t in merged:
             add = (", " if packed else "") + t
-            if chars + len(add) > 490: continue
+            if chars + len(add) > 490:
+                continue
             packed.append(t); chars += len(add)
         result["tags"] = packed
         result["tags_string"] = ", ".join(packed)
         result["tags_chars"] = len(result["tags_string"])
-        log(f"[seo] final tags: {len(packed)} ({result['tags_chars']} chars)")
+        log(f"[seo] final tags: {len(packed)} ({result['tags_chars']} chars) [+base_tags guaranteed]")
     except Exception as e:
         log(f"[seo] tag merge skip: {str(e)[:80]}")
+
+    result["base_tags"] = _BASE_TAGS
 
     # 7) Tag scores (parallel with SEO already done)
     try:
@@ -503,10 +521,8 @@ def _auto_fix(result: dict, log=print) -> dict:
             title = title[:62] + "…"
             changed.append("trim")
         elif len(title) < 40:
-            # Too short — add a relevant suffix
-            suffix = " — yeh zaroor dekho" if "roman-urdu" in (result.get("detected_language","")) else " — Must Watch!"
-            title = (title.rstrip("…") + suffix)[:65]
-            changed.append("extend")
+            # Too short — just flag, don't add generic suffix (generic suffix = wrong SEO)
+            changed.append("short-title-warning")
 
         # Fix: no emoji — add one based on emotion
         ec = _emoji_count(title)
@@ -535,8 +551,11 @@ def _auto_fix(result: dict, log=print) -> dict:
     if fixed_titles:
         result["titles"] = fixed_titles
 
-    # ── 4) DESCRIPTION — keyword in first line + minimum word count ─
+    # ── 4) DESCRIPTION — vidIQ Triple Keyword: tag words in description ──
     desc = result.get("description", "")
+    tags = result.get("tags", [])
+
+    # Fix: primary keyword in line 1
     if kw1 and desc and kw1 not in desc.lower()[:130]:
         lines = desc.split("\n")
         if lines:
@@ -544,33 +563,82 @@ def _auto_fix(result: dict, log=print) -> dict:
             desc = "\n".join(lines)
             result["description"] = desc
             fixes.append("desc: kw injected in line 1")
+
+    # vidIQ Triple Keyword: inject tags into description
+    # YouTube algorithm: jo words title+tags+description teeno mein hain unhe push karta hai
+    desc_lower = desc.lower()
+    missing_from_desc = []
+    # Check all content-specific tags (top 12) + all base tags
+    tags_to_check = tags[:12] + [t for t in _BASE_TAGS if t not in tags[:12]]
+    for tag in tags_to_check:
+        tag_words = tag.lower().split()
+        if tag_words and not any(w in desc_lower for w in tag_words if len(w) > 3):
+            missing_from_desc.append(tag)
+
+    if missing_from_desc:
+        lang = result.get("detected_language", "roman-urdu")
+        t = missing_from_desc[:6]
+        n = len(t)
+
+        # Natural sentences — keyword stuffing nahi, YouTube-friendly organic text
+        if lang == "english":
+            if n == 1:
+                injection = f"\n\nFans of {t[0]} will especially enjoy this animated short!"
+            elif n == 2:
+                injection = f"\n\nThis video is a must-watch for {t[0]} and {t[1]} fans."
+            elif n <= 4:
+                injection = (
+                    f"\n\nThis {t[0]} story is perfect for {t[1]} and {t[2]} fans."
+                )
+                if n == 4:
+                    injection += f" {t[3]} lovers will enjoy it too."
+            else:
+                injection = (
+                    f"\n\nThis {t[0]} story blends {t[1]} and {t[2]} into one unforgettable "
+                    f"animated short. {t[3]} fans and {t[4]} lovers will especially enjoy this!"
+                )
+        else:
+            if n == 1:
+                injection = f"\n\n{t[0]} ke fans ko yeh video zaroor dekhni chahiye!"
+            elif n == 2:
+                injection = f"\n\n{t[0]} aur {t[1]} ke deewaanon ke liye yeh ek perfect animated kahani hai."
+            elif n <= 4:
+                mid = " aur ".join([", ".join(t[1:-1]), t[-1]]) if n > 2 else t[1]
+                injection = (
+                    f"\n\nYeh {t[0]} wali animated kahani {mid} pasand karne walon ke liye bilkul sahi hai."
+                )
+            else:
+                injection = (
+                    f"\n\nYeh {t[0]} aur {t[1]} ki kahani un logon ke liye khaas hai jo {t[2]} "
+                    f"dekhna pasand karte hain. {t[3]} aur {t[4]} ke shauqeen bhi zaroor enjoy karein!"
+                )
+
+        desc = result.get("description", "").rstrip() + injection
+        result["description"] = desc
+        fixes.append(f"desc: {len(missing_from_desc)} tags injected (natural sentences)")
     # Word count fix — guarantee 150+ words for YouTube full indexing
     lang = result.get("detected_language", "roman-urdu")
-    subject = result.get("detected_subject", kw)
+    # detected_subject comma list ho sakti hai — sirf pehla clean subject lo
+    _raw_subj = result.get("detected_subject", "") or kw
+    subject = _raw_subj.split(",")[0].strip() or kw
     desc = result.get("description", "")
     wc = len(desc.split())
-    if wc < 120:
+    if wc < 150:
         if lang == "english":
             extra = (
-                f"\n\nIn this short animated video, we explore the story of {subject}. "
-                f"This {kw} story is designed to be both entertaining and meaningful for viewers "
-                f"of all ages. Whether you are a child or an adult, the message of this animated "
-                f"short will stay with you long after it ends.\n\n"
-                f"At MeloToons, we create high-quality 3D animated stories that inspire, educate, "
-                f"and entertain. Every video is crafted with care to deliver a strong moral lesson "
-                f"through engaging characters and beautiful visuals. If you enjoy this video, please "
-                f"share it with your friends and family.\n\n"
-                f"Search keywords: {kw}, animated story, moral story for kids, short film animation."
+                f"\n\nThis video about {subject} is part of the MeloToons channel. "
+                f"If you enjoy this {kw} content, please like and subscribe for more. "
+                f"Share this video with someone who would appreciate it.\n\n"
+                f"MeloToons creates high-quality videos that entertain and inspire. "
+                f"Join our growing community and never miss an upload."
             )
         else:
             extra = (
-                f"\n\nIs chhoti si animated video mein {subject} ki dil ko chhoo lene wali kahani hai. "
-                f"Yeh {kw} story har umra ke viewers ke liye entertaining aur meaningful hai. "
-                f"Chahे aap bachay ho ya bade, is animated short ka message aapke dil mein ghar kar jayega.\n\n"
-                f"MeloToons pe hum high-quality 3D animated kahaniyan banate hain jo inspire, educate "
-                f"aur entertain karti hain. Har video mein ek strong moral lesson hota hai. "
-                f"Agar yeh video pasand aaye to apne doston aur family ke saath zaroor share karein.\n\n"
-                f"Search: {kw}, animated kahani, moral story, bachon ki kahani, 3D animation shorts."
+                f"\n\nYeh {subject} video MeloToons channel ka hissa hai. "
+                f"Agar yeh {kw} video aapko pasand aaya to like karein aur subscribe karein. "
+                f"Apne doston aur family ke saath zaroor share karein.\n\n"
+                f"MeloToons pe hum aise videos banate hain jo entertain aur inspire karte hain. "
+                f"Hamare channel se jud jaiye aur koi video miss mat kariye."
             )
         result["description"] = desc.rstrip() + extra
         new_wc = len(result["description"].split())
@@ -747,7 +815,7 @@ def _seo_score(d: dict) -> dict:
     # ── DESCRIPTION (25 pts) ────────────────────────────────────────
     d_checks = [
         ("Keyword description LINE 1 mein (~125 chars)", _kw(first125),                         12),
-        ("Description 150+ words (YouTube indexing)",   wc >= 100,                               7),
+        ("Description 150+ words (YouTube indexing)",   wc >= 150,                               7),
         ("Engagement sawaal (comment trigger)",         "?" in desc,                              4),
         ("CTA — Like + Subscribe",                     any(w in desc_l for w in
                                                         ("subscribe", "like", "bell")),            2),
@@ -764,14 +832,19 @@ def _seo_score(d: dict) -> dict:
     tg_pts = sum(w for _, ok, w in tg_checks if ok)
 
     # ── KEYWORD CONSISTENCY — vidIQ Triple Keyword (20 pts) ─────────
+    # vidIQ formula: SAME keywords in TITLE + TAGS + DESCRIPTION (all 3 places)
     kw_title = bool(kw1) and kw1 in title_l[:45]
     kw_desc  = _kw(first125)
     kw_tag   = bool(kw1) and bool(tags) and kw1 in tags[0].lower()
+    # Extra: tag keywords appearing in description body (vidIQ "5 keywords in desc" check)
+    tags_in_desc_count = sum(1 for t in tags[:10]
+                             if any(w in desc_l for w in t.lower().split() if len(w)>3))
     triple   = sum([kw_title, kw_desc, kw_tag])
     kw_checks = [
-        ("Triple Keyword: Title mein",             kw_title,   7),
-        ("Triple Keyword: Description line 1 mein", kw_desc,   7),
-        ("Triple Keyword: First tag mein",          kw_tag,    6),
+        ("Triple Keyword: Title mein (primary keyword)", kw_title, 7),
+        ("Triple Keyword: Description line 1 mein",      kw_desc,  7),
+        ("Triple Keyword: First tag mein",                kw_tag,   3),
+        ("Tag keywords description mein bhi (vidIQ check)", tags_in_desc_count >= 3, 3),
     ]
     kw_pts = sum(w for _, ok, w in kw_checks if ok)
 

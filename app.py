@@ -6,11 +6,22 @@ Chalao:  python app.py   (phir browser khud khulega:  http://127.0.0.1:5055)
 from __future__ import annotations
 
 import os
+import sys
 import threading
 import traceback
 import uuid
 import webbrowser
 from pathlib import Path
+
+# Windows console encoding fix — prevents crash on Unicode/emoji in print()
+import io as _io
+try:
+    if hasattr(sys.stdout, 'buffer'):
+        sys.stdout = _io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    if hasattr(sys.stderr, 'buffer'):
+        sys.stderr = _io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+except Exception:
+    pass
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
@@ -27,6 +38,9 @@ ALLOWED = {".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v", ".3gp"}
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 300 * 1024 * 1024  # 300 MB
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0  # No caching
+app.jinja_env.auto_reload = True
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
 @app.route("/")
@@ -58,19 +72,309 @@ def generate():
     file.save(tmp)
 
     try:
+        print(f"[generate] video={file.filename} lang={lang} skip_tr={skip_tr} hint='{hint[:50]}'", flush=True)
         result = analyzer.analyze_video(str(tmp), extra_hint=hint, lang_pref=lang,
                                         use_transcript=not skip_tr)
+        result["analyzed_file"] = file.filename
+        _has_t = bool(result.get("transcript", "").strip())
+        _has_v = result.get("has_visual", False)
+        result["context_quality"] = (
+            "transcript+visual" if _has_t and _has_v else
+            "transcript"        if _has_t else
+            "visual_only"       if _has_v else
+            "title_only"
+        )
+        print(f"[generate] done: lang={result.get('detected_language')} kw={result.get('primary_keyword','?')[:30]}", flush=True)
         return jsonify({"ok": True, "result": result})
     except analyzer.AnalyzerError as e:
         return jsonify({"ok": False, "error": str(e)}), 500
     except Exception as e:  # noqa: BLE001
-        traceback.print_exc()
-        return jsonify({"ok": False, "error": f"Unexpected: {e}"}), 500
+        tb = traceback.format_exc()
+        try:
+            print(tb, flush=True)
+        except Exception:
+            pass
+        return jsonify({"ok": False, "error": f"Unexpected: {e}", "traceback": tb[-800:]}), 500
     finally:
         try:
             tmp.unlink(missing_ok=True)
         except Exception:
             pass
+
+
+@app.route("/analyze_url", methods=["POST"])
+def analyze_url():
+    """YouTube URL se FAST analyze — sirf transcript + thumbnails (full download nahi)."""
+    data = request.get_json() or {}
+    url   = (data.get("url") or "").strip()
+    lang  = (data.get("lang") or "auto").strip()
+    hint  = (data.get("hint") or "").strip()
+
+    if not url or ("youtube" not in url and "youtu.be" not in url):
+        return jsonify({"ok": False, "error": "Valid YouTube URL daalo"}), 400
+
+    import subprocess, uuid, tempfile, json as _json, concurrent.futures
+    tmp_dir = Path(tempfile.gettempdir()) / f"yt_{uuid.uuid4().hex}"
+    tmp_dir.mkdir(exist_ok=True)
+
+    try:
+        # Step 1: Download video + info only (no subtitles — causes 429)
+        meta_r = subprocess.run([
+            "yt-dlp",
+            "-f", "worst[ext=mp4]/best[height<=360][ext=mp4]/best",
+            "--write-info-json", "--no-playlist",
+            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "--add-header", "Accept-Language:en-US,en;q=0.9",
+            "--extractor-retries", "3",
+            "-o", str(tmp_dir / "video.%(ext)s"), url
+        ], capture_output=True, timeout=180, text=True)
+
+        if meta_r.returncode != 0:
+            # Check if it's a 429 rate limit
+            stderr = meta_r.stderr or ""
+            if "429" in stderr:
+                return jsonify({"ok": False, "error": "YouTube rate limit — 5-10 minute baad dobara try karo"}), 429
+            if not list(tmp_dir.iterdir()):  # No files at all
+                return jsonify({"ok": False, "error": f"Video download nahi hua. Wajah: {stderr[-150:]}"}), 500
+
+        # Read metadata
+        info = {}
+        for f in tmp_dir.glob("*.info.json"):
+            with open(f, encoding='utf-8', errors='replace') as fp:
+                info = _json.load(fp)
+            break
+
+        existing_title = info.get("title", "")
+        existing_desc  = info.get("description", "")[:500]
+        existing_tags  = info.get("tags", [])[:10]
+        duration       = info.get("duration", 0)
+        thumb_url      = info.get("thumbnail", "")
+
+        # Read transcript — prefer Hindi/Urdu captions first
+        transcript_text = ""
+        detected_lang   = "roman-urdu"  # MeloToons default desi channel
+
+        import re as _re
+        all_vtt = sorted(tmp_dir.glob("*.vtt"), key=lambda f: (0 if any(x in f.name for x in ["hi","ur","pa"]) else 1))
+        for f in all_vtt:
+            lines = []
+            for line in open(f, encoding='utf-8', errors='replace'):
+                line = line.strip()
+                if line and not line.startswith("WEBVTT") and "-->" not in line and not line.startswith("align:"):
+                    clean = _re.sub(r'<[^>]+>', '', line)
+                    if clean and clean not in lines[-1:]:
+                        lines.append(clean)
+            if lines:
+                transcript_text = " ".join(lines[:200])
+                if "en" in f.name and "hi" not in f.name and "ur" not in f.name:
+                    detected_lang = "english"
+                else:
+                    detected_lang = "roman-urdu"
+                break
+
+        # Step 2: Download thumbnail for visual analysis
+        visual_desc = ""
+        if thumb_url:
+            try:
+                import urllib.request, base64
+                thumb_path = tmp_dir / "thumb.jpg"
+                urllib.request.urlretrieve(thumb_url, str(thumb_path))
+                with open(thumb_path, 'rb') as tf:
+                    b64 = base64.b64encode(tf.read()).decode()
+                from core.frames import frames_to_description
+                visual_desc = frames_to_description([b64], log=lambda x: None)
+            except Exception:
+                pass
+
+        # Step 3: Use downloaded video for Whisper + frames (full analysis)
+        video_files = list(tmp_dir.glob("video.mp4")) + list(tmp_dir.glob("video.webm")) + list(tmp_dir.glob("video.*"))
+        video_files = [f for f in video_files if f.suffix in ('.mp4','.webm','.mkv','.m4v')]
+
+        if video_files:
+            vf = video_files[0]
+            # Whisper transcription — ALWAYS run for accurate language detection
+            try:
+                from core.transcribe import _groq_transcribe, suggested_mode
+                tr = _groq_transcribe(str(vf))
+                if tr and tr.get("text"):
+                    transcript_text = tr["text"]  # Whisper overrides captions
+                    # Map Whisper language to output mode
+                    detected_lang = suggested_mode(tr.get("language", ""))
+                    print(f"[url] Whisper lang={tr.get('language')} → {detected_lang}", flush=True)
+            except Exception as e:
+                print(f"[url] Whisper failed: {e}", flush=True)
+            # Visual frames analysis
+            if not visual_desc:
+                try:
+                    from core.frames import extract_frames, frames_to_description
+                    frms = extract_frames(str(vf), n=5)
+                    if frms:
+                        visual_desc = frames_to_description(frms)
+                except Exception:
+                    pass
+
+        # Step 4: Effective language
+        # auto = use Whisper detection | manual = force user selection
+        if lang == "auto":
+            eff_lang = detected_lang
+        else:
+            eff_lang = lang
+        print(f"[url] eff_lang={eff_lang} (user_pref={lang}, detected={detected_lang})", flush=True)
+
+        from core import llm as _llm
+        from core.analyzer import _SYSTEM_PROMPT, _normalize, _auto_fix, _seo_score
+        import uuid as _uuid
+
+        # Context quality check — kuch na ho to fail loudly
+        has_real_content = bool(transcript_text.strip()) or bool(visual_desc.strip())
+        if not has_real_content and not existing_title.strip():
+            return jsonify({"ok": False, "error":
+                "Video se kuch bhi analyze nahi ho saka. "
+                "Video private/deleted ho sakti hai, ya download fail hua. "
+                "Video directly upload karo (neeche wala section)."
+            }), 400
+
+        req_id = _uuid.uuid4().hex[:12]  # Groq cache break
+
+        # VIDEO CONTENT PEHLE — LLM actual video ko prioritize kare, template se nahi
+        video_context = f"REQUEST_ID: {req_id}\n\n"
+        video_context += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        video_context += "⭐ IS VIDEO KA ACTUAL CONTENT (PEHLE PADHO — YAHI PRIMARY SOURCE HAI)\n"
+        video_context += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+
+        if existing_title:
+            video_context += f"YOUTUBE VIDEO TITLE: {existing_title}\n"
+        if existing_tags:
+            video_context += f"EXISTING TAGS (improve karo): {', '.join(existing_tags[:8])}\n"
+        if transcript_text:
+            video_context += (
+                f"\nAUDIO TRANSCRIPT (Whisper) — YEH ASLI SCRIPT HAI:\n"
+                f'"""\n{transcript_text[:2000]}\n"""\n'
+                "↑ Transcript se characters, story, topic exactly samjho. Generic mat banao.\n"
+            )
+        else:
+            video_context += "\n⚠️ Transcript nahi mila — visual + title se analyze karo.\n"
+        if visual_desc:
+            video_context += (
+                f"\nVIDEO VISUAL DESCRIPTION:\n{visual_desc[:400]}\n"
+                "↑ Characters, setting, actions exactly dekho.\n"
+            )
+        if hint:
+            video_context += f"\nUSER HINT: {hint}\n"
+        if not transcript_text and not visual_desc:
+            video_context += f"\n⚠️ Sirf title available hai: '{existing_title}' — is pe best possible SEO banao.\n"
+
+        prompt = video_context + "\n" + _SYSTEM_PROMPT.replace("{mode}", eff_lang) + f"\n\nLANGUAGE_MODE = {eff_lang}\n"
+
+        data_out = _llm.generate(prompt)
+        result = _normalize(data_out)
+        result["transcript"] = transcript_text[:300]
+        result["whisper_language"] = detected_lang
+        result["analyzed_title"] = existing_title  # UI mein confirm karne ke liye
+        result["analyzed_url"] = url
+        result["context_quality"] = (
+            "transcript+visual" if transcript_text and visual_desc else
+            "transcript" if transcript_text else
+            "visual" if visual_desc else
+            "title_only"
+        )
+        result = _auto_fix(result)
+
+        # SEO research
+        try:
+            from core import seo_research as _sr, tag_score as _ts
+            kw = result.get("primary_keyword","")
+            if kw:
+                seo = _sr.full_research(kw, result.get("content_summary",""), eff_lang)
+                new_tags = [t for t in seo.get("keyword_tags",[]) if t not in result.get("tags",[])]
+                merged = result.get("tags",[]) + new_tags
+                packed, chars = [], 0
+                for t in merged:
+                    add = (", " if packed else "") + t
+                    if chars + len(add) > 490: break
+                    packed.append(t); chars += len(add)
+                result["tags"] = packed
+                result["tags_string"] = ", ".join(packed)
+                result["tags_chars"] = len(result["tags_string"])
+                result["search_keywords"] = seo.get("keyword_suggestions",[])
+                result["trends"] = seo.get("trends",{})
+                result["competitors"] = seo.get("competitors",{})
+                result["posting_strategy"] = seo.get("posting_strategy",{})
+                result["tag_scores"] = _ts.score_tags_bulk(result["tags"][:15], language=eff_lang)
+        except Exception:
+            pass
+
+        result["seo"] = _seo_score(result)
+        return jsonify({"ok": True, "result": result})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+    finally:
+        import shutil
+        try: shutil.rmtree(tmp_dir, ignore_errors=True)
+        except: pass
+
+
+@app.route("/video_ideas", methods=["POST"])
+def video_ideas():
+    """Trending niche pe based video ideas generate karo."""
+    data = request.get_json() or {}
+    language = (data.get("language") or "roman-urdu").strip()
+    niche = (data.get("niche") or "cute animated moral story hindi urdu").strip()
+
+    try:
+        # Step 1: Trending topics from YouTube autocomplete
+        from core.seo_research import _yt_autocomplete, get_competitor_data
+        seeds = {
+            "roman-urdu": ["cute billi story", "moral kahani hindi", "emotional animated", "pyaari kahani"],
+            "english": ["cute cat animation", "moral story animated", "emotional story kids"],
+        }.get(language, ["cute billi story", "moral kahani hindi"])
+
+        trending = []
+        seen = set()
+        for seed in seeds[:3]:
+            for s in _yt_autocomplete(seed, hl="hi" if language != "english" else "en"):
+                if s.lower() not in seen and len(s) > 5:
+                    seen.add(s.lower()); trending.append(s)
+
+        # Step 2: Competitor top videos
+        comp = get_competitor_data("cute animated moral story hindi", max_results=5)
+        top_titles = [v["title"][:60] for v in comp.get("top_videos", [])[:5]]
+
+        # Step 3: LLM generates 10 video ideas
+        lang_rule = "Roman Urdu/Hindi (Latin letters only)" if language != "english" else "English"
+        prompt = f"""You are a viral YouTube Shorts idea generator for MeloToons channel.
+Channel niche: AI 3D Pixar-style cute animated emotional/moral stories (desi Pakistani/Indian audience).
+Language for ideas: {lang_rule}
+
+TRENDING searches in this niche right now:
+{', '.join(trending[:12])}
+
+TOP performing competitor videos:
+{chr(10).join(top_titles)}
+
+Generate 8 UNIQUE video ideas that:
+1. Match MeloToons niche (cute animals/children, moral/emotional stories, 3D animation)
+2. Are NOT already done by competitors (fresh angles)
+3. Have high viral potential for desi audience
+4. Each idea has a specific character + situation + emotional hook
+
+Return JSON array of 8 objects:
+[{{
+  "title": "Ready-to-use viral title (matched language, 40-60 chars, 1 emoji)",
+  "concept": "2-line concept: character + what happens + emotional hook",
+  "hook": "Pehle 3 second ka opening line",
+  "viral_angle": "why this will go viral (emotion/relatability/surprise)",
+  "difficulty": "Easy/Medium/Hard to make"
+}}]"""
+
+        from core import llm as _llm
+        result = _llm.generate(prompt)
+        ideas = result if isinstance(result, list) else result.get("ideas", result.get("data", []))
+        return jsonify({"ok": True, "ideas": ideas[:8], "trending": trending[:10]})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
 
 
 @app.route("/refresh_titles", methods=["POST"])
@@ -347,6 +651,40 @@ Return JSON with ONLY the field(s) that changed (omit unchanged fields):
         return jsonify({"ok": True, "result": result})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)[:200]}), 500
+
+
+@app.route("/keyword_deep", methods=["POST"])
+def keyword_deep():
+    data = request.get_json() or {}
+    keyword = (data.get("keyword") or "").strip()
+    language = (data.get("language") or "roman-urdu").strip()
+    if not keyword:
+        return jsonify({"ok": False, "error": "Keyword missing"}), 400
+    try:
+        from core.vidiq_features import keyword_score_detailed
+        return jsonify({"ok": True, "result": keyword_score_detailed(keyword, language)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+
+
+@app.route("/trending_videos", methods=["POST"])
+def trending_videos():
+    data = request.get_json() or {}
+    keyword = (data.get("keyword") or "").strip()
+    if not keyword: return jsonify({"ok": False, "error": "Keyword missing"}), 400
+    try:
+        from core.vidiq_features import get_trending_videos
+        return jsonify({"ok": True, "videos": get_trending_videos(keyword)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+
+
+@app.route("/best_time", methods=["POST"])
+def best_time():
+    data = request.get_json() or {}
+    language = (data.get("language") or "roman-urdu").strip()
+    from core.vidiq_features import best_time_to_publish
+    return jsonify({"ok": True, "result": best_time_to_publish(language)})
 
 
 @app.route("/keyword_opportunity", methods=["POST"])
