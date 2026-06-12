@@ -453,24 +453,37 @@ go.onclick=async()=>{
   fd.append('hint',document.getElementById('hint').value||'');
   fd.append('lang',document.getElementById('lang').value||'auto');
   fd.append('skip_tr', document.getElementById('skip_tr').checked ? '1' : '0');
-  try{
-    const r=await fetch('/generate',{method:'POST',body:fd});
-    let j;
-    const ct=r.headers.get('content-type')||'';
-    if(ct.includes('application/json')){
-      j=await r.json();
-    } else {
-      if(r.status===413) showErr('⚠️ Video bahut badi hai — 50MB se chhoti video try karein.');
-      else if(r.status>=500) showErr('⚠️ Server temporarily busy tha — 30 second baad dobara try karein.');
-      else showErr('⚠️ Server error ('+r.status+') — thodi der baad try karein.');
+  const MAX_TRIES=3, RETRY_DELAY=6000;
+  let lastErr='Kuch galat hua.';
+  for(let attempt=0; attempt<MAX_TRIES; attempt++){
+    try{
+      if(attempt>0){
+        go.innerHTML='<span class="spin"></span>🔄 Retry '+(attempt)+'/'+( MAX_TRIES-1)+'...';
+        await new Promise(res=>setTimeout(res, RETRY_DELAY));
+      }
+      const r=await fetch('/generate',{method:'POST',body:fd});
+      const ct=r.headers.get('content-type')||'';
+      if(r.status===413){ lastErr='Video bahut badi hai — 50MB se chhoti video try karein.'; break; }
+      if(!ct.includes('application/json')){
+        lastErr='Server restart ho raha hai...';
+        if(attempt<MAX_TRIES-1) continue;
+        lastErr='Server temporarily unavailable — thodi der baad try karein.';
+        break;
+      }
+      const j=await r.json();
+      if(!j.ok){ lastErr=j.error||'Kuch galat hua.';
+        if(j.error&&(j.error.includes('rate')||j.error.includes('429')||j.error.includes('limit'))&&attempt<MAX_TRIES-1) continue;
+        break;
+      }
+      render(j.result);
       go.disabled=false; go.innerHTML='✨ Title + Description Banao';
       return;
+    }catch(e){
+      lastErr='Connection error — internet check karein.';
+      if(attempt<MAX_TRIES-1) continue;
     }
-    if(!j.ok){ showErr(j.error||'Kuch galat hua'); }
-    else render(j.result);
-  }catch(e){
-    showErr('⚠️ Thodi der baad try karein — server temporarily busy tha.');
   }
+  showErr('⚠️ '+lastErr);
   go.disabled=false; go.innerHTML='✨ Title + Description Banao';
 };
 
