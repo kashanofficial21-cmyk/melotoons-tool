@@ -455,10 +455,22 @@ go.onclick=async()=>{
   fd.append('skip_tr', document.getElementById('skip_tr').checked ? '1' : '0');
   try{
     const r=await fetch('/generate',{method:'POST',body:fd});
-    const j=await r.json();
+    let j;
+    const ct=r.headers.get('content-type')||'';
+    if(ct.includes('application/json')){
+      j=await r.json();
+    } else {
+      if(r.status===413) showErr('⚠️ Video bahut badi hai — 50MB se chhoti video try karein.');
+      else if(r.status>=500) showErr('⚠️ Server temporarily busy tha — 30 second baad dobara try karein.');
+      else showErr('⚠️ Server error ('+r.status+') — thodi der baad try karein.');
+      go.disabled=false; go.innerHTML='✨ Title + Description Banao';
+      return;
+    }
     if(!j.ok){ showErr(j.error||'Kuch galat hua'); }
     else render(j.result);
-  }catch(e){ showErr('Network/Server error: '+e.message); }
+  }catch(e){
+    showErr('⚠️ Thodi der baad try karein — server temporarily busy tha.');
+  }
   go.disabled=false; go.innerHTML='✨ Title + Description Banao';
 };
 

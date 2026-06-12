@@ -703,6 +703,23 @@ def keyword_opportunity():
         return jsonify({"ok": False, "error": str(e)[:200]}), 500
 
 
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify({"ok": False, "error": "Video bahut badi hai. 100MB se chhoti video upload karein."}), 413
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({"ok": False, "error": "Server error — thodi der baad try karein."}), 500
+
+@app.errorhandler(502)
+def bad_gateway(e):
+    return jsonify({"ok": False, "error": "Server busy hai — 30 second baad try karein."}), 502
+
+@app.errorhandler(504)
+def timeout_error(e):
+    return jsonify({"ok": False, "error": "Request timeout — dobara try karein."}), 504
+
+
 def _open_browser(url: str):
     try:
         webbrowser.open(url)
