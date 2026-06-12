@@ -447,23 +447,49 @@ go.onclick=async()=>{
   if(!chosen) return;
   go.disabled=true; out.style.display='none'; err.style.display='none';
   const skip = document.getElementById('skip_tr').checked;
-  go.innerHTML='<span class="spin"></span>'+(skip?'⚡ Fast mode... (~10 sec)':'🔍 Script + SEO + Metadata... (~15 sec)');
-  const fd=new FormData();
-  fd.append('video',chosen);
-  fd.append('hint',document.getElementById('hint').value||'');
-  fd.append('lang',document.getElementById('lang').value||'auto');
-  fd.append('skip_tr', document.getElementById('skip_tr').checked ? '1' : '0');
+  const hint = document.getElementById('hint').value||'';
+  const lang = document.getElementById('lang').value||'auto';
+  const ext  = '.'+chosen.name.split('.').pop().toLowerCase();
+
+  // --- Chunked upload (no size limit) ---
+  const CHUNK_SIZE = 8 * 1024 * 1024; // 8MB per chunk
+  const totalChunks = Math.ceil(chosen.size / CHUNK_SIZE);
+  const uid = Math.random().toString(36).slice(2)+Date.now().toString(36);
+
+  // Upload chunks
+  for(let i=0; i<totalChunks; i++){
+    const pct = Math.round((i/totalChunks)*60);
+    go.innerHTML='<span class="spin"></span>Upload '+pct+'%... ('+(i+1)+'/'+totalChunks+')';
+    const blob = chosen.slice(i*CHUNK_SIZE, (i+1)*CHUNK_SIZE);
+    const fd2 = new FormData();
+    fd2.append('uid',uid); fd2.append('idx',i); fd2.append('total',totalChunks);
+    fd2.append('ext',ext); fd2.append('chunk',blob,'chunk');
+    let ok=false;
+    for(let t=0;t<3;t++){
+      try{
+        const r=await fetch('/upload_chunk',{method:'POST',body:fd2});
+        if(r.ok){ok=true;break;}
+      }catch(e){ if(t===2){showErr('Upload fail — internet check karein.');go.disabled=false;go.innerHTML='✨ Title + Description Banao';return;} }
+      await new Promise(res=>setTimeout(res,2000));
+    }
+    if(!ok){showErr('Chunk upload fail — dobara try karein.');go.disabled=false;go.innerHTML='✨ Title + Description Banao';return;}
+  }
+
+  go.innerHTML='<span class="spin"></span>'+(skip?'⚡ Analyzing... (~10 sec)':'🔍 Analyzing... (~20 sec)');
+
+  // Assemble + generate with retry
   const MAX_TRIES=3, RETRY_DELAY=6000;
   let lastErr='Kuch galat hua.';
   for(let attempt=0; attempt<MAX_TRIES; attempt++){
     try{
       if(attempt>0){
-        go.innerHTML='<span class="spin"></span>🔄 Retry '+(attempt)+'/'+( MAX_TRIES-1)+'...';
+        go.innerHTML='<span class="spin"></span>🔄 Retry '+(attempt)+'/'+(MAX_TRIES-1)+'...';
         await new Promise(res=>setTimeout(res, RETRY_DELAY));
       }
-      const r=await fetch('/generate',{method:'POST',body:fd});
+      const r=await fetch('/assemble_and_generate',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({uid,total:totalChunks,ext,hint,lang,skip_tr:skip})});
       const ct=r.headers.get('content-type')||'';
-      if(r.status===413){ lastErr='Video bahut badi hai — 50MB se chhoti video try karein.'; break; }
       if(!ct.includes('application/json')){
         lastErr='Server restart ho raha hai...';
         if(attempt<MAX_TRIES-1) continue;

@@ -37,7 +37,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED = {".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v", ".3gp"}
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 300 * 1024 * 1024  # 300 MB
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024 * 1024  # 2 GB (chunked bypass)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0  # No caching
 app.jinja_env.auto_reload = True
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -703,9 +703,88 @@ def keyword_opportunity():
         return jsonify({"ok": False, "error": str(e)[:200]}), 500
 
 
+CHUNK_DIR = BASE / "uploads" / "_chunks"
+CHUNK_DIR.mkdir(parents=True, exist_ok=True)
+
+
+@app.route("/upload_chunk", methods=["POST"])
+def upload_chunk():
+    """Receive one chunk of a large file upload."""
+    uid   = request.form.get("uid", "")
+    idx   = int(request.form.get("idx", 0))
+    total = int(request.form.get("total", 1))
+    ext   = request.form.get("ext", ".mp4")
+    if not uid:
+        return jsonify({"ok": False, "error": "uid missing"}), 400
+    chunk = request.files.get("chunk")
+    if not chunk:
+        return jsonify({"ok": False, "error": "chunk missing"}), 400
+    chunk_path = CHUNK_DIR / f"{uid}_{idx:04d}"
+    chunk.save(str(chunk_path))
+    return jsonify({"ok": True, "idx": idx, "total": total})
+
+
+@app.route("/assemble_and_generate", methods=["POST"])
+def assemble_and_generate():
+    """Assemble chunks and run analysis."""
+    data  = request.get_json(force=True)
+    uid   = data.get("uid", "")
+    total = int(data.get("total", 0))
+    ext   = data.get("ext", ".mp4")
+    hint  = (data.get("hint") or "").strip()
+    lang  = (data.get("lang") or "auto").strip().lower()
+    skip_tr = bool(data.get("skip_tr", False))
+
+    if not uid or total == 0:
+        return jsonify({"ok": False, "error": "uid/total missing"}), 400
+    if ext not in ALLOWED:
+        return jsonify({"ok": False, "error": f"Format support nahi: {ext}"}), 400
+
+    out_path = UPLOAD_DIR / f"{uid}{ext}"
+    try:
+        with open(out_path, "wb") as out_f:
+            for i in range(total):
+                cp = CHUNK_DIR / f"{uid}_{i:04d}"
+                if not cp.exists():
+                    return jsonify({"ok": False, "error": f"Chunk {i} missing — dobara try karein."}), 400
+                out_f.write(cp.read_bytes())
+                cp.unlink()
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Assembly error: {e}"}), 500
+
+    try:
+        print(f"[chunked] video={uid}{ext} lang={lang} skip_tr={skip_tr}", flush=True)
+        result = analyzer.analyze_video(str(out_path), extra_hint=hint,
+                                        lang_pref=lang, use_transcript=not skip_tr)
+        result["analyzed_file"] = uid + ext
+        _has_t = bool(result.get("transcript", "").strip())
+        _has_v = result.get("has_visual", False)
+        result["context_quality"] = (
+            "transcript+visual" if _has_t and _has_v else
+            "transcript"        if _has_t else
+            "visual_only"       if _has_v else
+            "title_only"
+        )
+        return jsonify({"ok": True, "result": result})
+    except analyzer.AnalyzerError as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+    except Exception as e:
+        tb = traceback.format_exc()
+        try:
+            print(tb, flush=True)
+        except Exception:
+            pass
+        return jsonify({"ok": False, "error": f"Unexpected: {e}", "traceback": tb[-800:]}), 500
+    finally:
+        try:
+            out_path.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+
 @app.errorhandler(413)
 def too_large(e):
-    return jsonify({"ok": False, "error": "Video bahut badi hai. 100MB se chhoti video upload karein."}), 413
+    return jsonify({"ok": False, "error": "Chunk too large — developer error."}), 413
 
 @app.errorhandler(500)
 def server_error(e):
